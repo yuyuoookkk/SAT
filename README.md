@@ -107,3 +107,30 @@ explicit "not an admin" screen rather than an empty dashboard.
 | `npm run build` | typecheck (`tsc -b`) then production build |
 | `npm run lint` | Oxlint |
 | `npm run preview` | serve the production build |
+
+## Supabase MCP server
+
+`.mcp.json` registers Supabase's hosted MCP server at project scope. It holds no
+credential — the project ref is public, and access is granted per developer
+through OAuth.
+
+It is configured **read-only**, with the feature groups narrowed to
+`docs,database,debugging`. The `account`, `branching`, `development` and
+`functions` groups are deliberately left out: this project ref points at the
+production database holding real alumni records, and nothing in day-to-day work
+here needs an agent to deploy functions, create branches or alter the project.
+
+To use it, install the CLI and authenticate once from inside the repo:
+
+```bash
+npm install -g @anthropic-ai/claude-code
+cd /path/to/SAT
+claude
+```
+
+Then type `/mcp`, pick **supabase**, and complete the browser sign-in.
+
+After authenticating, confirm the restriction held: `/mcp` should list read
+tools only. If you can see a migration-applying or SQL-writing tool, the
+read-only flag did not take effect — re-check the current parameter name in
+Supabase's MCP setup guide before using it against production.
