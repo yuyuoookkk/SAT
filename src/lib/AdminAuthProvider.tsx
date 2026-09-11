@@ -16,6 +16,9 @@ import type { AdminAuth } from './adminAuthContext';
 export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  // Stored against the user id it was resolved for, so a previous account's
+  // answer can never be read as the current one during a sign-out/sign-in.
+  const [adminCheck, setAdminCheck] = useState<{ uid: string; ok: boolean } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -36,10 +39,36 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  // Ask the database whether this user is on the allowlist (migration 0002).
+  //
+  // This check is for messaging, not security — RLS is the real boundary, and a
+  // non-admin already reads nothing. So if the call itself fails (for instance
+  // migration 0002 has not been applied and the function is absent) we leave
+  // this null and let the user through to a dashboard the database will simply
+  // return no rows for, rather than locking out a correctly-configured admin.
+  useEffect(() => {
+    const uid = session?.user?.id;
+    if (!uid) return;
+
+    let alive = true;
+    supabase.rpc('is_admin').then(({ data, error }) => {
+      if (!alive || error) return;
+      setAdminCheck({ uid, ok: Boolean(data) });
+    });
+
+    return () => {
+      alive = false;
+    };
+  }, [session]);
+
+  const uid = session?.user?.id;
+  const isAdmin = uid && adminCheck?.uid === uid ? adminCheck.ok : null;
+
   const value = useMemo<AdminAuth>(
     () => ({
       session,
       loading,
+      isAdmin,
       signIn: async (email, password) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -48,7 +77,7 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
         await supabase.auth.signOut();
       },
     }),
-    [session, loading],
+    [session, loading, isAdmin],
   );
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;

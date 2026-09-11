@@ -30,10 +30,13 @@ Apply the migration once:
 supabase db push
 ```
 
-`supabase/migrations/0001_admin_schema.sql` creates the `alumni` roster and
-`activity_log`, extends `tracer_study` with every questionnaire field, adds the
-`admin_dashboard()` aggregate, and enables Row Level Security. It is additive
-and idempotent — existing rows are preserved and backfilled.
+- `0001_admin_schema.sql` creates the `alumni` roster and `activity_log`,
+  extends `tracer_study` with every questionnaire field, adds the
+  `admin_dashboard()` aggregate, and enables Row Level Security.
+- `0002_admin_allowlist.sql` restricts admin access to the `admin_users`
+  table, so being signed in is no longer enough — see below.
+
+Both are additive and idempotent; existing rows are preserved and backfilled.
 
 ### Creating an admin sign-in
 
@@ -73,10 +76,28 @@ Two consequences worth knowing:
    `RETURNING`, which needs a SELECT policy, and fails with a misleading
    "violates row-level security" error. Granting `anon` SELECT to work around
    that would expose every response.
-2. **Turn off public sign-ups** (Authentication → Providers → Email), or the
-   policies' "any authenticated user" rule lets a stranger register and read
-   everything. For a stricter setup, gate the policies on an `admin_users`
-   allowlist instead of `using (true)`.
+2. **Admin access is an explicit allowlist.** Migration 0002 replaced "any
+   authenticated user" with membership of `public.admin_users`, so a stranger
+   registering through public sign-up reads nothing. Accounts existing when
+   0002 ran were enrolled automatically.
+
+### Managing admins
+
+```sql
+-- grant
+insert into public.admin_users (user_id, email)
+select id, email from auth.users where email = 'someone@example.com';
+
+-- revoke
+delete from public.admin_users where email = 'someone@example.com';
+
+-- who has access
+select email, created_at from public.admin_users order by created_at;
+```
+
+Removing the final admin is blocked by a trigger, so you cannot lock yourself
+out of the dashboard. A signed-in user who is not on the list is shown an
+explicit "not an admin" screen rather than an empty dashboard.
 
 ## Scripts
 
