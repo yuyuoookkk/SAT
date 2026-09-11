@@ -349,21 +349,3 @@ export const EVALUATION_ROWS = [
   { name: 'ratingSkill', label: 'Pengembangan Soft Skill & Hard Skill' },
   { name: 'ratingDisiplin', label: 'Kedisiplinan & Lingkungan Sekolah' },
 ] as const;
-
-/**
- * Fields the Figma design adds that have no column in `tracer_study` yet.
- * They are captured in component state and shown in the UI, but are not sent
- * to Supabase — inserting an unknown column fails the whole request. Add the
- * columns, then move these into the payload below.
- */
-export const UNMAPPED_FIELDS = [
-  'jenisKelamin', 'jurusan', 'email', 'alamat',
-  'bidangPerusahaan', 'tanggalMulaiKerja', 'rentangGaji', 'kotaKerja',
-  'caraMemperolehPekerjaan', 'kepuasanKerja',
-  'jenjangPendidikan', 'statusPerguruanTinggi', 'sumberPembiayaan',
-  'tahunMasukKuliah', 'kesesuaianJurusanKuliah', 'kepuasanKuliah',
-  'legalitasUsaha', 'mulaiUsaha', 'kotaUsaha', 'omsetBulanan',
-  'jumlahKaryawan', 'sumberModal', 'kesesuaianJurusanUsaha', 'perkembanganUsaha',
-  'lamaMenunggu', 'channelMelamar', 'jumlahLamaran', 'kendalaUtama', 'kebutuhanProgram',
-  'ratingGuru', 'ratingPkl', 'ratingSkill', 'ratingDisiplin',
-] as const;

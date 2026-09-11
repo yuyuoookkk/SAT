@@ -60,31 +60,89 @@ const FormWizard = () => {
     setIsSubmitting(true);
     setSubmitError(null);
 
-    const str = (k: string) => (formData[k] as string) || null;
+    const str = (k: string) => ((formData[k] as string) || null);
     const num = (k: string) => (formData[k] as number) ?? null;
+    const int = (k: string) => {
+      const v = formData[k];
+      if (v === undefined || v === '') return null;
+      const n = parseInt(String(v), 10);
+      return Number.isNaN(n) ? null : n;
+    };
     const statusLabel = (formData.statusSaatIni as string) ?? '';
 
+    // One Link & Match score, whichever section the chosen status showed.
+    const kesesuaian =
+      num('kesesuaianJurusan') ?? num('kesesuaianJurusanKuliah') ?? num('kesesuaianJurusanUsaha');
+
     try {
+      // Deliberately no `.select()` here: anon may INSERT but not SELECT, and
+      // chaining .select() would request RETURNING and be refused by RLS.
       const { error } = await supabase.from('tracer_study').insert([
         {
+          // identitas
           nama_lengkap: str('namaLengkap'),
           nisn: str('nisn'),
-          tahun_lulus: formData.tahunLulus ? parseInt(String(formData.tahunLulus), 10) : null,
+          jenis_kelamin: str('jenisKelamin'),
+          jurusan: str('jurusan'),
+          tahun_lulus: int('tahunLulus'),
+          email: str('email'),
           no_telepon: str('noTelepon'),
+          alamat: str('alamat'),
           status_saat_ini: STATUS_DB_VALUE[statusLabel] ?? statusLabel,
+
+          // karir & pekerjaan
           nama_perusahaan: str('namaPerusahaan'),
+          bidang_perusahaan: str('bidangPerusahaan'),
           jabatan: str('jabatan'),
-          // Kept as text: this column previously stored string values.
-          kesesuaian_jurusan:
-            formData.kesesuaianJurusan !== undefined ? String(formData.kesesuaianJurusan) : null,
+          tanggal_mulai_kerja: str('tanggalMulaiKerja'),
+          rentang_gaji: str('rentangGaji'),
+          kota_kerja: str('kotaKerja'),
+          cara_memperoleh_pekerjaan: str('caraMemperolehPekerjaan'),
+          kepuasan_kerja: num('kepuasanKerja'),
+
+          // pendidikan lanjut
           nama_kampus: str('namaKampus'),
           jurusan_kuliah: str('jurusanKuliah'),
+          jenjang_pendidikan: str('jenjangPendidikan'),
+          status_perguruan_tinggi: str('statusPerguruanTinggi'),
+          sumber_pembiayaan: str('sumberPembiayaan'),
+          tahun_masuk_kuliah: str('tahunMasukKuliah'),
+          kesesuaian_jurusan_kuliah: num('kesesuaianJurusanKuliah'),
+          kepuasan_kuliah: num('kepuasanKuliah'),
+
+          // wirausaha
           nama_usaha: str('namaUsaha'),
           bidang_usaha: str('bidangUsaha'),
+          legalitas_usaha: str('legalitasUsaha'),
+          mulai_usaha: str('mulaiUsaha'),
+          kota_usaha: str('kotaUsaha'),
+          omset_bulanan: str('omsetBulanan'),
+          jumlah_karyawan: int('jumlahKaryawan'),
+          sumber_modal: str('sumberModal'),
+          kesesuaian_jurusan_usaha: num('kesesuaianJurusanUsaha'),
+          perkembangan_usaha: num('perkembanganUsaha'),
+
+          // belum bekerja
           kegiatan_saat_ini: str('kegiatanSaatIni'),
+          lama_menunggu: str('lamaMenunggu'),
+          channel_melamar: str('channelMelamar'),
+          jumlah_lamaran: str('jumlahLamaran'),
+          kendala_utama: str('kendalaUtama'),
+          kebutuhan_program: str('kebutuhanProgram'),
+
+          // evaluasi
+          rating_guru: num('ratingGuru'),
           rating_fasilitas: num('ratingFasilitas'),
           rating_kurikulum: num('ratingKurikulum'),
+          rating_pkl: num('ratingPkl'),
+          rating_skill: num('ratingSkill'),
+          rating_disiplin: num('ratingDisiplin'),
           saran_masukan: str('saranMasukan'),
+
+          // Link & Match: the pre-existing text column keeps its shape, and the
+          // numeric twin added in migration 0001 is what the dashboard reads.
+          kesesuaian_jurusan: kesesuaian !== null ? String(kesesuaian) : null,
+          kesesuaian_jurusan_skor: kesesuaian,
         },
       ]);
 
