@@ -1,47 +1,38 @@
-import { ChevronLeft } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const Header = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isForm = location.pathname.includes('/tracer-form');
+/**
+ * Top app bar — Figma node 3428:823 / 3435:385.
+ *
+ * The crest artwork could not be exported from Figma in this environment, so
+ * the mark falls back to a monogram badge. Drop the real file into
+ * `src/assets/` and swap the `<span>` for an `<img className="topbar__logo">`.
+ */
+const Header = () => (
+  <header className="topbar">
+    <div className="container topbar__inner">
+      <Link to="/" className="topbar__brand">
+        <span className="topbar__logo topbar__logo--fallback" aria-hidden="true">
+          SMK
+        </span>
+        <span className="topbar__name">SMK TI Bali Global Jimbaran</span>
+      </Link>
 
-  return (
-    <header style={{
-      backgroundColor: 'var(--primary-color)',
-      color: 'white',
-      padding: '1.25rem 1.25rem',
-      display: 'flex',
-      alignItems: 'center',
-      borderBottomLeftRadius: '16px',
-      borderBottomRightRadius: '16px',
-      boxShadow: '0 4px 12px rgba(30, 86, 160, 0.15)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 10
-    }}>
-      {isForm && (
-        <button 
-          onClick={() => navigate(-1)} 
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'white',
-            marginRight: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer'
-          }}
-        >
-          <ChevronLeft size={24} />
-        </button>
-      )}
-      <div>
-        <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 700, color: 'white' }}>SMK TI Bali Global</h1>
-        <p style={{ fontSize: '0.8rem', margin: 0, opacity: 0.9 }}>Jimbaran - Tracer Study Portal</p>
-      </div>
-    </header>
-  );
-};
+      <nav className="topbar__nav">
+        <Link className="topbar__link" to="/">
+          Beranda
+        </Link>
+        <a className="topbar__link" href="#tentang">
+          Tentang
+        </a>
+        <a className="topbar__link" href="#statistik">
+          Statistik
+        </a>
+        <Link className="btn btn-accent" to="/tracer-form">
+          Isi Tracer Study
+        </Link>
+      </nav>
+    </div>
+  </header>
+);
 
 export default Header;
