@@ -1,138 +1,161 @@
-import React from 'react';
+import type React from 'react';
+import type { ComponentType } from 'react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Briefcase,
+  Building2,
+  CalendarDays,
+  GraduationCap,
+  Info,
+  Layers,
+  MapPin,
+  Users,
+  Wallet,
+} from 'lucide-react';
+import { ChoiceGroup, Scale, SelectField, TextField } from './fields';
+import type { FieldSpec, FormData, StatusKegiatan } from '../../lib/tracerStudy';
+import { SECTIONS, STATUS_SECTIONS } from '../../lib/tracerStudy';
+
+const ICONS: Record<string, ComponentType<{ size?: number | string }>> = {
+  building: Building2,
+  briefcase: Briefcase,
+  calendar: CalendarDays,
+  wallet: Wallet,
+  pin: MapPin,
+  layers: Layers,
+  book: BookOpen,
+  cap: GraduationCap,
+  users: Users,
+  info: Info,
+};
 
 interface Props {
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: FormData;
+  setField: (name: string, value: string | number) => void;
   nextStep: () => void;
+  prevStep: () => void;
 }
 
-const statusOptions = [
-  { id: 'bekerja', label: 'Bekerja' },
-  { id: 'kuliah', label: 'Kuliah' },
-  { id: 'wirausaha', label: 'Wirausaha' },
-  { id: 'belum_bekerja', label: 'Belum Bekerja / Mencari Kerja' },
-  { id: 'bekerja_kuliah', label: 'Bekerja Sambil Kuliah' },
-  { id: 'kuliah_wirausaha', label: 'Kuliah Sambil Berwirausaha' }
-];
-
-const Step2Status: React.FC<Props> = ({ formData, setFormData, nextStep }) => {
-  
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFormData({ ...formData, statusSaatIni: e.target.value });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+/**
+ * Step 2 — the status-dependent detail form.
+ *
+ * The Figma has one artboard per status ("form bekerja", "form kuliah",
+ * "form berwirausaha", "form Belum Bekerja" and the two combined variants).
+ * They share a single card layout, so this renders the sections that the
+ * chosen status maps to rather than duplicating six near-identical screens.
+ */
+const Step2Status: React.FC<Props> = ({ formData, setField, nextStep, prevStep }) => {
+  const status = formData.statusSaatIni as StatusKegiatan | undefined;
+  const sections = status ? STATUS_SECTIONS[status] : [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     nextStep();
   };
 
-  const renderConditionalFields = () => {
-    const status = formData.statusSaatIni;
-    if (!status) return null;
+  const renderField = (spec: FieldSpec) => {
+    const Icon = spec.icon ? ICONS[spec.icon] : undefined;
+    const value = (formData[spec.name] as string) ?? '';
 
-    if (status.includes('bekerja')) {
+    if (spec.kind === 'select') {
       return (
-        <div className="animate-fade-in" style={{ marginTop: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>Informasi Pekerjaan</h3>
-          <div className="form-group">
-            <label className="form-label">Nama Perusahaan / Tempat Kerja</label>
-            <input type="text" name="namaPerusahaan" className="form-control" value={formData.namaPerusahaan || ''} onChange={handleInputChange} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Jabatan / Posisi</label>
-            <input type="text" name="jabatan" className="form-control" value={formData.jabatan || ''} onChange={handleInputChange} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Kesesuaian dengan Jurusan</label>
-            <select name="kesesuaianJurusan" className="form-control" value={formData.kesesuaianJurusan || ''} onChange={handleInputChange} required>
-              <option value="">-- Pilih --</option>
-              <option value="sangat_sesuai">Sangat Sesuai</option>
-              <option value="sesuai">Sesuai</option>
-              <option value="kurang_sesuai">Kurang Sesuai</option>
-              <option value="tidak_sesuai">Tidak Sesuai</option>
-            </select>
-          </div>
-        </div>
-      );
-    }
-    
-    if (status.includes('kuliah')) {
-      return (
-        <div className="animate-fade-in" style={{ marginTop: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>Informasi Perguruan Tinggi</h3>
-          <div className="form-group">
-            <label className="form-label">Nama Kampus / Universitas</label>
-            <input type="text" name="namaKampus" className="form-control" value={formData.namaKampus || ''} onChange={handleInputChange} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Jurusan / Program Studi</label>
-            <input type="text" name="jurusanKuliah" className="form-control" value={formData.jurusanKuliah || ''} onChange={handleInputChange} required />
-          </div>
-        </div>
+        <SelectField
+          key={spec.name}
+          label={spec.label}
+          name={spec.name}
+          icon={Icon}
+          wide={spec.wide}
+          placeholder={spec.placeholder ?? 'Pilih'}
+          options={spec.options ?? []}
+          value={value}
+          onChange={setField}
+        />
       );
     }
 
-    if (status.includes('wirausaha')) {
-      return (
-        <div className="animate-fade-in" style={{ marginTop: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>Informasi Usaha</h3>
-          <div className="form-group">
-            <label className="form-label">Nama Usaha</label>
-            <input type="text" name="namaUsaha" className="form-control" value={formData.namaUsaha || ''} onChange={handleInputChange} required />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Bidang Usaha</label>
-            <input type="text" name="bidangUsaha" className="form-control" value={formData.bidangUsaha || ''} onChange={handleInputChange} required />
-          </div>
-        </div>
-      );
-    }
-
-    if (status === 'belum_bekerja') {
-      return (
-        <div className="animate-fade-in" style={{ marginTop: '1.5rem' }}>
-          <div className="form-group">
-            <label className="form-label">Kegiatan Saat Ini</label>
-            <input type="text" name="kegiatanSaatIni" className="form-control" placeholder="Contoh: Mengikuti kursus, persiapan kuliah" value={formData.kegiatanSaatIni || ''} onChange={handleInputChange} required />
-          </div>
-        </div>
-      );
-    }
+    return (
+      <TextField
+        key={spec.name}
+        label={spec.label}
+        name={spec.name}
+        icon={Icon}
+        wide={spec.wide}
+        type={spec.kind === 'date' ? 'date' : spec.kind === 'number' ? 'number' : 'text'}
+        placeholder={spec.placeholder}
+        value={value}
+        onChange={setField}
+      />
+    );
   };
 
   return (
-    <div className="animate-fade-in">
-      <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Status Alumni</h2>
-      <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem' }}>Pilih aktivitas Anda saat ini.</p>
+    <form className="animate-fade-in" onSubmit={handleSubmit}>
+      <div className="form-panel__head">
+        <h3>{sections.length ? SECTIONS[sections[0]].title : 'Informasi Status'}</h3>
+        <p>
+          Berikan informasi detail mengenai status profesional Anda saat ini untuk membantu sekolah
+          memetakan relevansi kurikulum.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label">Status Saat Ini</label>
-          <select 
-            className="form-control" 
-            name="statusSaatIni"
-            value={formData.statusSaatIni || ''}
-            onChange={handleStatusChange}
-            required
-          >
-            <option value="">-- Pilih Status --</option>
-            {statusOptions.map(opt => (
-              <option key={opt.id} value={opt.id}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+      {!status && (
+        <p className="form-error">
+          <Info size={16} />
+          Pilih status kegiatan pada langkah sebelumnya terlebih dahulu.
+        </p>
+      )}
 
-        {renderConditionalFields()}
+      {sections.map((key, i) => {
+        const section = SECTIONS[key];
 
-        <div style={{ marginTop: '2rem' }}>
-          <button type="submit" className="btn btn-primary" disabled={!formData.statusSaatIni}>Selanjutnya</button>
-        </div>
-      </form>
-    </div>
+        return (
+          <section className="form-section" key={key}>
+            {i > 0 && <h4 className="form-section__title">{section.title}</h4>}
+
+            <div className="form-grid">
+              {section.fields.map(renderField)}
+
+              {section.choice && (
+                <ChoiceGroup
+                  label={section.choice.label}
+                  name={section.choice.name}
+                  options={section.choice.options}
+                  value={(formData[section.choice.name] as string) ?? ''}
+                  onChange={setField}
+                />
+              )}
+
+              {section.scales.map((scale) => (
+                <div className="form-block" key={scale.name}>
+                  <Scale
+                    label={scale.label}
+                    name={scale.name}
+                    value={formData[scale.name] as number | undefined}
+                    onChange={setField}
+                    lowLabel={scale.lowLabel}
+                    highLabel={scale.highLabel}
+                    caption={scale.caption}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      <div className="form-actions">
+        <button type="button" className="btn btn-ghost" onClick={prevStep}>
+          <ArrowLeft size={16} />
+          Kembali
+        </button>
+        <button type="submit" className="btn btn-primary" disabled={!status}>
+          Lanjut ke Evaluasi
+          <ArrowRight size={16} />
+        </button>
+      </div>
+    </form>
   );
 };
 

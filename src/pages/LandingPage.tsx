@@ -1,91 +1,202 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import {
+  ArrowRight,
+  Briefcase,
+  GraduationCap,
+  Handshake,
+  LineChart,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Users,
+} from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
-import { Briefcase, GraduationCap, Building2 } from 'lucide-react';
 
-const LandingPage = () => {
-  const navigate = useNavigate();
+/** Bento statistics inside the hero — Figma node 3431:47. */
+const bento = [
+  { icon: Users, value: '4,200+', caption: 'Total Alumni Terdata' },
+  { icon: Briefcase, value: '85%', caption: 'Keterserapan Industri' },
+  { icon: ShieldCheck, value: '100%', caption: 'Keamanan Data Alumni' },
+  { icon: LineChart, value: 'Real-time', caption: 'Dashboard Statistik' },
+];
 
-  return (
-    <>
-      <Header />
-      <main className="main-content container animate-fade-in" style={{ paddingTop: '1.5rem' }}>
-        
-        {/* Hero Section */}
-        <div className="card" style={{ 
-          background: 'linear-gradient(135deg, var(--primary-color) 0%, #3B82F6 100%)',
-          color: 'white'
-        }}>
-          <h2 style={{ color: 'white', fontSize: '1.5rem', marginBottom: '0.5rem' }}>Selamat Datang, Alumni!</h2>
-          <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.95rem' }}>
-            Partisipasi Anda dalam Tracer Study ini sangat penting untuk pengembangan kurikulum dan peningkatan mutu sekolah kita.
-          </p>
-        </div>
+/** "Mengapa Mengisi Tracer Study?" — Figma node 3428:675. */
+const features = [
+  {
+    icon: Handshake,
+    title: 'Pemetaan Karir Alumni',
+    body: 'Memudahkan sekolah dalam menjalin kerjasama strategis dengan perusahaan tempat Anda bekerja.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Evaluasi Kurikulum',
+    body: 'Mengukur sejauh mana materi yang diajarkan masih relevan dengan kebutuhan industri saat ini.',
+  },
+  {
+    icon: Rocket,
+    title: 'Akreditasi & Mutu',
+    body: 'Menjadi bukti penjaminan mutu pendidikan yang dipakai langsung dalam proses akreditasi sekolah.',
+  },
+];
 
-        {/* Statistics Grid */}
-        <h3 style={{ marginTop: '1.5rem', marginBottom: '1rem', fontSize: '1.1rem' }}>Statistik Lulusan</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-          
-          <div className="card" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
-            <div style={{ 
-              background: '#E0F2FE', color: '#0284C7', 
-              width: '48px', height: '48px', borderRadius: '50%', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 0.75rem auto'
-            }}>
-              <Briefcase size={24} />
-            </div>
-            <h4 style={{ fontSize: '1.5rem', marginBottom: '0.25rem', color: 'var(--primary-color)' }}>65%</h4>
-            <p style={{ fontSize: '0.8rem', margin: 0 }}>Bekerja</p>
+/** "Gambaran Data Alumni" — Figma node 3428:710. */
+const stats = [
+  {
+    icon: Briefcase,
+    title: 'Penempatan Kerja',
+    body: 'Persentase alumni yang telah terserap di Dunia Usaha dan Dunia Industri (DUDI).',
+    value: '72%',
+    pill: 'Terserap Kerja',
+    tint: 'var(--brand-100)',
+    tone: 'var(--brand-700)',
+    pillBg: 'rgba(11, 94, 215, 0.1)',
+  },
+  {
+    icon: GraduationCap,
+    title: 'Studi Lanjut',
+    body: 'Persentase alumni yang melanjutkan ke jenjang Pendidikan Tinggi atau Vokasi.',
+    value: '18%',
+    pill: 'Kuliah',
+    tint: 'var(--violet-200)',
+    tone: 'var(--violet-600)',
+    pillBg: 'rgba(177, 136, 255, 0.1)',
+  },
+  {
+    icon: Rocket,
+    title: 'Wirausaha Mandiri',
+    body: 'Persentase alumni yang berhasil membangun usaha mandiri atau startup kreatif.',
+    value: '10%',
+    pill: 'Entrepreneur',
+    tint: 'var(--gold-200)',
+    tone: 'var(--gold-900)',
+    pillBg: 'rgba(129, 96, 0, 0.1)',
+  },
+];
+
+const LandingPage = () => (
+  <>
+    <Header />
+
+    <main className="main-content animate-fade-in">
+      {/* Hero — Figma node 3431:4 */}
+      <section className="hero">
+        <div className="container hero__inner">
+          <div className="hero__copy">
+            <span className="hero__badge">Khusus Alumni SMK TI Jimbaran</span>
+            <h1>
+              Pusat Data &amp;
+              <br />
+              <span>Tracer Study Alumni</span>
+            </h1>
+            <p className="hero__lede">
+              Selamat datang di portal resmi pelacakan jejak alumni. Platform ini didedikasikan untuk
+              mengumpulkan data karir dan pendidikan lanjut Anda guna memajukan kualitas almamater.
+            </p>
+            <Link className="btn btn-accent" to="/tracer-form">
+              Mulai Isi Tracer Study
+              <ArrowRight size={16} />
+            </Link>
           </div>
 
-          <div className="card" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
-            <div style={{ 
-              background: '#FEF3C7', color: '#D97706', 
-              width: '48px', height: '48px', borderRadius: '50%', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 0.75rem auto'
-            }}>
-              <GraduationCap size={24} />
-            </div>
-            <h4 style={{ fontSize: '1.5rem', marginBottom: '0.25rem', color: '#D97706' }}>20%</h4>
-            <p style={{ fontSize: '0.8rem', margin: 0 }}>Kuliah</p>
+          <div className="bento">
+            {bento.map(({ icon: Icon, value, caption }) => (
+              <div className="bento__card" key={caption}>
+                <span className="bento__icon">
+                  <Icon size={26} />
+                </span>
+                <div>
+                  <p className="bento__value">{value}</p>
+                  <p className="bento__caption">{caption}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tentang Tracer Study — Figma node 3428:668 */}
+      <section className="section section--muted" id="tentang">
+        <div className="container">
+          <div className="section-head">
+            <h2>Mengapa Mengisi Tracer Study?</h2>
+            <p>
+              Data yang Anda berikan adalah kunci utama bagi sekolah untuk melakukan evaluasi
+              berkelanjutan. Melalui Tracer Study, kami dapat mengukur sejauh mana kurikulum kami
+              relevan dengan kebutuhan industri masa kini.
+            </p>
           </div>
 
-          <div className="card" style={{ textAlign: 'center', padding: '1.5rem 1rem', gridColumn: '1 / -1' }}>
-            <div style={{ 
-              background: '#DCFCE7', color: '#16A34A', 
-              width: '48px', height: '48px', borderRadius: '50%', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 0.75rem auto'
-            }}>
-              <Building2 size={24} />
-            </div>
-            <h4 style={{ fontSize: '1.5rem', marginBottom: '0.25rem', color: '#16A34A' }}>15%</h4>
-            <p style={{ fontSize: '0.8rem', margin: 0 }}>Wirausaha</p>
+          <div className="feature-grid">
+            {features.map(({ icon: Icon, title, body }) => (
+              <article className="feature" key={title}>
+                <span className="feature__icon">
+                  <Icon size={24} />
+                </span>
+                <div>
+                  <h4>{title}</h4>
+                  <p>{body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Statistik Alumni — Figma node 3428:703 */}
+      <section className="section section--sunken" id="statistik">
+        <div className="container">
+          <div className="section-head">
+            <h2>Gambaran Data Alumni</h2>
+            <p>
+              Data statistik real-time yang dihasilkan dari partisipasi aktif alumni dalam mengisi
+              Tracer Study.
+            </p>
           </div>
 
+          <div className="stat-grid">
+            {stats.map(({ icon: Icon, title, body, value, pill, tint, tone, pillBg }) => (
+              <article className="stat-card" key={title}>
+                <span className="stat-card__icon" style={{ backgroundColor: tint, color: tone }}>
+                  <Icon size={23} />
+                </span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+                <div className="stat-card__foot">
+                  <span className="stat-card__value" style={{ color: tone }}>
+                    {value}
+                  </span>
+                  <span className="stat-card__pill" style={{ backgroundColor: pillBg, color: tone }}>
+                    {pill}
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
+      </section>
 
-        {/* CTA Section */}
-        <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-          <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Mulai Isi Tracer Study</h3>
-          <p style={{ fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-            Hanya butuh waktu sekitar 5 menit. Data Anda akan dijaga kerahasiaannya.
-          </p>
-          <button 
-            className="btn btn-primary"
-            onClick={() => navigate('/tracer-form')}
-            style={{ padding: '1rem', fontSize: '1.1rem' }}
-          >
-            Mulai Pengisian
-          </button>
+      {/* Call to action — Figma node 3428:750 */}
+      <section className="section">
+        <div className="container">
+          <div className="cta">
+            <div className="cta__inner">
+              <h2>Belum Mengisi Tracer Study Tahun Ini?</h2>
+              <p>
+                Partisipasi Anda hanya membutuhkan waktu kurang dari 10 menit namun berdampak besar
+                bagi masa depan almamater.
+              </p>
+              <Link className="btn btn-light" to="/tracer-form">
+                Mulai Isi Data Sekarang
+              </Link>
+            </div>
+          </div>
         </div>
+      </section>
+    </main>
 
-      </main>
-      <Footer />
-    </>
-  );
-};
+    <Footer />
+  </>
+);
 
 export default LandingPage;

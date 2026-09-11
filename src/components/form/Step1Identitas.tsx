@@ -1,86 +1,133 @@
-import React from 'react';
+import type React from 'react';
+import { ArrowRight, CalendarDays, GraduationCap, Info, Mail, MapPin, Phone, User, Users } from 'lucide-react';
+import { ChoiceGroup, SelectField, TextField, TextareaField } from './fields';
+import type { FormData } from '../../lib/tracerStudy';
+import { JENIS_KELAMIN, JURUSAN, STATUS_KEGIATAN, TAHUN_LULUS } from '../../lib/tracerStudy';
 
 interface Props {
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: FormData;
+  setField: (name: string, value: string | number) => void;
   nextStep: () => void;
 }
 
-const Step1Identitas: React.FC<Props> = ({ formData, setFormData, nextStep }) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
+/** Step 1 — Figma node 3433:2 ("Data Responden Tracer Study"). */
+const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     nextStep();
   };
 
+  const str = (k: string) => (formData[k] as string) ?? '';
+
   return (
-    <div className="animate-fade-in">
-      <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Data Diri</h2>
-      <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem' }}>Lengkapi identitas pribadi Anda.</p>
+    <form className="animate-fade-in" onSubmit={handleSubmit}>
+      <div className="form-grid">
+        <TextField
+          label="Nama Lengkap (Sesuai Ijazah)"
+          name="namaLengkap"
+          icon={User}
+          placeholder="Contoh: I Putu Gede Prasetya"
+          value={str('namaLengkap')}
+          onChange={setField}
+          required
+          wide
+        />
 
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label">Nama Lengkap</label>
-          <input 
-            type="text" 
-            name="namaLengkap" 
-            className="form-control" 
-            placeholder="Contoh: Budi Santoso"
-            value={formData.namaLengkap || ''}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label">NISN</label>
-          <input 
-            type="text" 
-            name="nisn" 
-            className="form-control" 
-            placeholder="Contoh: 0041234567"
-            value={formData.nisn || ''}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <TextField
+          label="NISN"
+          name="nisn"
+          icon={Info}
+          placeholder="10 digit nomor NISN"
+          value={str('nisn')}
+          onChange={setField}
+          required
+        />
 
-        <div className="form-group">
-          <label className="form-label">Tahun Lulus</label>
-          <input 
-            type="number" 
-            name="tahunLulus" 
-            className="form-control" 
-            placeholder="Contoh: 2023"
-            value={formData.tahunLulus || ''}
-            onChange={handleChange}
-            required
-            min="2000"
-            max="2030"
-          />
-        </div>
+        <SelectField
+          label="Jenis Kelamin"
+          name="jenisKelamin"
+          icon={Users}
+          placeholder="Pilih Jenis Kelamin"
+          options={[...JENIS_KELAMIN]}
+          value={str('jenisKelamin')}
+          onChange={setField}
+          required
+        />
 
-        <div className="form-group">
-          <label className="form-label">Nomor Telepon / WhatsApp</label>
-          <input 
-            type="tel" 
-            name="noTelepon" 
-            className="form-control" 
-            placeholder="Contoh: 081234567890"
-            value={formData.noTelepon || ''}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <SelectField
+          label="Tahun Lulus"
+          name="tahunLulus"
+          icon={CalendarDays}
+          placeholder="Pilih Tahun Lulus"
+          options={TAHUN_LULUS}
+          value={str('tahunLulus')}
+          onChange={setField}
+          required
+        />
 
-        <div style={{ marginTop: '2rem' }}>
-          <button type="submit" className="btn btn-primary">Selanjutnya</button>
-        </div>
-      </form>
-    </div>
+        <SelectField
+          label="Kompetensi Keahlian (Jurusan)"
+          name="jurusan"
+          icon={GraduationCap}
+          placeholder="Pilih Jurusan"
+          options={[...JURUSAN]}
+          value={str('jurusan')}
+          onChange={setField}
+          required
+        />
+
+        <TextField
+          label="Email Aktif"
+          name="email"
+          type="email"
+          icon={Mail}
+          placeholder="nama@email.com"
+          value={str('email')}
+          onChange={setField}
+          required
+        />
+
+        <TextField
+          label="Nomor HP (WhatsApp)"
+          name="noTelepon"
+          type="tel"
+          icon={Phone}
+          placeholder="0812xxxxxxx"
+          value={str('noTelepon')}
+          onChange={setField}
+          required
+        />
+
+        <TextareaField
+          label="Alamat Domisili Saat Ini"
+          name="alamat"
+          icon={MapPin}
+          rows={3}
+          placeholder="Jl. Raya Kampus Unud, Jimbaran, Kec. Kuta Sel., Kabupaten Badung, Bali"
+          value={str('alamat')}
+          onChange={setField}
+        />
+
+        <ChoiceGroup
+          label="Status Kegiatan Saat Ini"
+          name="statusSaatIni"
+          options={[...STATUS_KEGIATAN]}
+          value={str('statusSaatIni')}
+          onChange={setField}
+        />
+      </div>
+
+      <div className="form-actions">
+        <span className="field-hint" style={{ border: 'none', padding: 0 }}>
+          <Info size={14} />
+          Verifikasi keakuratan data sebelum melanjutkan kuesioner.
+        </span>
+        <button type="submit" className="btn btn-primary" disabled={!str('statusSaatIni')}>
+          Lanjut ke Status Pekerjaan
+          <ArrowRight size={16} />
+        </button>
+      </div>
+    </form>
   );
 };
 
