@@ -121,5 +121,26 @@ begin
 
     raise notice 'Admin % created.', v_email;
   end if;
+
+  -- GoTrue reads these columns into non-nullable strings. A hand-written
+  -- INSERT leaves them NULL, and every sign-in then fails with
+  -- "Database error querying schema" before the password is even checked.
+  -- Done as a defensive loop because the exact column set varies by version.
+  declare
+    v_col  text;
+    v_cols text[] := array[
+      'confirmation_token', 'recovery_token', 'email_change_token_new',
+      'email_change', 'email_change_token_current', 'phone_change',
+      'phone_change_token', 'reauthentication_token'
+    ];
+  begin
+    foreach v_col in array v_cols loop
+      if exists (select 1 from information_schema.columns
+                  where table_schema = 'auth' and table_name = 'users'
+                    and column_name = v_col) then
+        execute format('update auth.users set %I = '''' where %I is null', v_col, v_col);
+      end if;
+    end loop;
+  end;
 end
 $$;

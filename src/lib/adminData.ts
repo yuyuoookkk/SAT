@@ -239,3 +239,23 @@ export async function importAlumniCsv(text: string): Promise<number> {
 
   return rows.length;
 }
+
+/** The handful of aggregate numbers the public landing page shows. */
+export interface PublicStats {
+  total_alumni: number;
+  total_respons: number;
+  pct_bekerja: number;
+  pct_kuliah: number;
+  pct_wirausaha: number;
+}
+
+/**
+ * Readable by anonymous visitors — see migration 0003. Returns counts and
+ * percentages only, never rows, so the landing page can show live figures
+ * without any read policy on the underlying tables.
+ */
+export async function fetchPublicStats(): Promise<PublicStats> {
+  const { data, error } = await supabase.rpc('public_tracer_stats');
+  if (error) throw error;
+  return data as PublicStats;
+}

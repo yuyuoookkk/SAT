@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -12,11 +13,27 @@ import {
 } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
+import { fetchPublicStats } from '../lib/adminData';
+import type { PublicStats } from '../lib/adminData';
+import { formatNumber } from '../lib/format';
 
-/** Bento statistics inside the hero — Figma node 3431:47. */
-const bento = [
-  { icon: Users, value: '4,200+', caption: 'Total Alumni Terdata' },
-  { icon: Briefcase, value: '85%', caption: 'Keterserapan Industri' },
+/**
+ * Bento statistics inside the hero — Figma node 3431:47.
+ *
+ * The first two are live figures from the database; the last two describe the
+ * platform rather than the data, so they stay fixed.
+ */
+const bentoFor = (s: PublicStats | null) => [
+  {
+    icon: Users,
+    value: s ? formatNumber(s.total_alumni) : '—',
+    caption: 'Total Alumni Terdata',
+  },
+  {
+    icon: Briefcase,
+    value: s ? `${s.pct_bekerja}%` : '—',
+    caption: 'Keterserapan Industri',
+  },
   { icon: ShieldCheck, value: '100%', caption: 'Keamanan Data Alumni' },
   { icon: LineChart, value: 'Real-time', caption: 'Dashboard Statistik' },
 ];
@@ -41,12 +58,12 @@ const features = [
 ];
 
 /** "Gambaran Data Alumni" — Figma node 3428:710. */
-const stats = [
+const statsFor = (s: PublicStats | null) => [
   {
     icon: Briefcase,
     title: 'Penempatan Kerja',
     body: 'Persentase alumni yang telah terserap di Dunia Usaha dan Dunia Industri (DUDI).',
-    value: '72%',
+    value: s ? `${s.pct_bekerja}%` : '—',
     pill: 'Terserap Kerja',
     tint: 'var(--brand-100)',
     tone: 'var(--brand-700)',
@@ -56,7 +73,7 @@ const stats = [
     icon: GraduationCap,
     title: 'Studi Lanjut',
     body: 'Persentase alumni yang melanjutkan ke jenjang Pendidikan Tinggi atau Vokasi.',
-    value: '18%',
+    value: s ? `${s.pct_kuliah}%` : '—',
     pill: 'Kuliah',
     tint: 'var(--violet-200)',
     tone: 'var(--violet-600)',
@@ -66,7 +83,7 @@ const stats = [
     icon: Rocket,
     title: 'Wirausaha Mandiri',
     body: 'Persentase alumni yang berhasil membangun usaha mandiri atau startup kreatif.',
-    value: '10%',
+    value: s ? `${s.pct_wirausaha}%` : '—',
     pill: 'Entrepreneur',
     tint: 'var(--gold-200)',
     tone: 'var(--gold-900)',
@@ -74,8 +91,29 @@ const stats = [
   },
 ];
 
-const LandingPage = () => (
-  <>
+const LandingPage = () => {
+  const [stats, setStats] = useState<PublicStats | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetchPublicStats()
+      .then((data) => {
+        if (alive) setStats(data);
+      })
+      .catch(() => {
+        // The page is still perfectly readable without live figures; showing a
+        // dash beats blocking the whole landing page on one query.
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const bento = bentoFor(stats);
+  const statCards = statsFor(stats);
+
+  return (
+    <>
     <Header />
 
     <main className="main-content animate-fade-in">
@@ -155,7 +193,7 @@ const LandingPage = () => (
           </div>
 
           <div className="stat-grid">
-            {stats.map(({ icon: Icon, title, body, value, pill, tint, tone, pillBg }) => (
+            {statCards.map(({ icon: Icon, title, body, value, pill, tint, tone, pillBg }) => (
               <article className="stat-card" key={title}>
                 <span className="stat-card__icon" style={{ backgroundColor: tint, color: tone }}>
                   <Icon size={23} />
@@ -197,6 +235,7 @@ const LandingPage = () => (
 
     <Footer />
   </>
-);
+  );
+};
 
 export default LandingPage;

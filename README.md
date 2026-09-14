@@ -35,6 +35,10 @@ supabase db push
   `admin_dashboard()` aggregate, and enables Row Level Security.
 - `0002_admin_allowlist.sql` restricts admin access to the `admin_users`
   table, so being signed in is no longer enough — see below.
+- `0003_public_stats.sql` adds `public_tracer_stats()`, the only thing an
+  anonymous visitor may call. It returns aggregate counts and percentages and
+  never a row, so the landing page can show live figures while the underlying
+  tables stay unreadable.
 
 Both are additive and idempotent; existing rows are preserved and backfilled.
 
