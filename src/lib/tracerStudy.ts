@@ -57,6 +57,13 @@ export interface FieldSpec {
   options?: string[];
   icon?: string;
   wide?: boolean;
+  required?: boolean;
+  maxLength?: number;
+  minLength?: number;
+  numeric?: boolean;
+  min?: string | number;
+  /** Dates use 'today' to mean "cannot be in the future". */
+  max?: string | number | 'today';
 }
 
 export interface ScaleSpec {
@@ -88,7 +95,7 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
     fields: [
       {
         kind: 'text',
-        name: 'namaPerusahaan',
+        name: 'namaPerusahaan', required: true,
         label: 'Nama Perusahaan / Instansi',
         placeholder: 'Contoh: PT Teknologi Bangsa',
         icon: 'building',
@@ -112,12 +119,12 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
       },
       {
         kind: 'text',
-        name: 'jabatan',
+        name: 'jabatan', required: true,
         label: 'Jabatan / Posisi',
         placeholder: 'Contoh: Senior Fullstack Developer',
         icon: 'briefcase',
       },
-      { kind: 'date', name: 'tanggalMulaiKerja', label: 'Tanggal Mulai Bekerja', icon: 'calendar' },
+      { kind: 'date', name: 'tanggalMulaiKerja', max: 'today', label: 'Tanggal Mulai Bekerja', icon: 'calendar' },
       {
         kind: 'select',
         name: 'rentangGaji',
@@ -167,21 +174,21 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
     fields: [
       {
         kind: 'text',
-        name: 'namaKampus',
+        name: 'namaKampus', required: true,
         label: 'Nama Perguruan Tinggi/Kampus',
         placeholder: 'Contoh: Nama kampus',
         icon: 'building',
       },
       {
         kind: 'text',
-        name: 'jurusanKuliah',
+        name: 'jurusanKuliah', required: true,
         label: 'Program Studi/Jurusan',
         placeholder: 'Contoh: Teknik Informatika',
         icon: 'book',
       },
       {
         kind: 'select',
-        name: 'jenjangPendidikan',
+        name: 'jenjangPendidikan', required: true,
         label: 'Jenjang Pendidikan',
         placeholder: 'Contoh: D3, D4, S1, atau S2',
         options: ['D1', 'D2', 'D3', 'D4', 'S1', 'S2'],
@@ -203,7 +210,7 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
         options: ['Biaya Sendiri / Orang Tua', 'Beasiswa Penuh', 'Beasiswa Parsial', 'Ikatan Dinas'],
         icon: 'wallet',
       },
-      { kind: 'date', name: 'tahunMasukKuliah', label: 'Tahun Masuk / Tanggal Mulai', icon: 'calendar' },
+      { kind: 'date', name: 'tahunMasukKuliah', max: 'today', label: 'Tahun Masuk / Tanggal Mulai', icon: 'calendar' },
     ],
     scales: [
       { name: 'kesesuaianJurusanKuliah', label: 'Kesesuaian dengan Jurusan', ...SESUAI },
@@ -220,14 +227,14 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
     fields: [
       {
         kind: 'text',
-        name: 'namaUsaha',
+        name: 'namaUsaha', required: true,
         label: 'Nama Usaha / Brand',
         placeholder: 'Contoh: PT Teknologi Bangsa',
         icon: 'building',
       },
       {
         kind: 'text',
-        name: 'bidangUsaha',
+        name: 'bidangUsaha', required: true,
         label: 'Bidang Usaha',
         placeholder: 'Contoh: IT & Digital',
         icon: 'layers',
@@ -240,7 +247,7 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
         options: ['Perorangan (belum berbadan hukum)', 'CV', 'PT', 'Koperasi', 'UMKM Terdaftar'],
         icon: 'briefcase',
       },
-      { kind: 'date', name: 'mulaiUsaha', label: 'Mulai Berdiri / Mulai Usaha', icon: 'calendar' },
+      { kind: 'date', name: 'mulaiUsaha', max: 'today', label: 'Mulai Berdiri / Mulai Usaha', icon: 'calendar' },
       {
         kind: 'text',
         name: 'kotaUsaha',
@@ -261,6 +268,8 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
         label: 'Jumlah Karyawan / Tenaga Kerja',
         placeholder: 'Contoh: 2',
         icon: 'users',
+        min: 0,
+        max: 100000,
       },
       {
         kind: 'select',
@@ -286,7 +295,7 @@ export const SECTIONS: Record<SectionKey, SectionSpec> = {
     fields: [
       {
         kind: 'text',
-        name: 'kegiatanSaatIni',
+        name: 'kegiatanSaatIni', required: true,
         label: 'Status Kegiatan Saat Ini',
         placeholder: 'Contoh: Mencari Pekerjaan',
         icon: 'briefcase',

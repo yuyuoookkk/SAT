@@ -60,7 +60,14 @@ const FormWizard = () => {
     setIsSubmitting(true);
     setSubmitError(null);
 
-    const str = (k: string) => ((formData[k] as string) || null);
+    // Trim on the way out: a trailing space in a NISN or an email is invisible
+    // in the UI but makes the row impossible to match later.
+    const str = (k: string) => {
+      const v = formData[k];
+      if (typeof v !== 'string') return v ?? null;
+      const t = v.trim();
+      return t === '' ? null : t;
+    };
     const num = (k: string) => (formData[k] as number) ?? null;
     const int = (k: string) => {
       const v = formData[k];

@@ -55,6 +55,9 @@ const Step2Status: React.FC<Props> = ({ formData, setField, nextStep, prevStep }
     nextStep();
   };
 
+  // A date describing something that already happened cannot be in the future.
+  const today = new Date().toISOString().slice(0, 10);
+
   const renderField = (spec: FieldSpec) => {
     const Icon = spec.icon ? ICONS[spec.icon] : undefined;
     const value = (formData[spec.name] as string) ?? '';
@@ -71,6 +74,7 @@ const Step2Status: React.FC<Props> = ({ formData, setField, nextStep, prevStep }
           options={spec.options ?? []}
           value={value}
           onChange={setField}
+          required={spec.required}
         />
       );
     }
@@ -86,6 +90,12 @@ const Step2Status: React.FC<Props> = ({ formData, setField, nextStep, prevStep }
         placeholder={spec.placeholder}
         value={value}
         onChange={setField}
+        required={spec.required}
+        maxLength={spec.maxLength ?? (spec.kind === 'text' ? 120 : undefined)}
+        minLength={spec.minLength}
+        numeric={spec.numeric}
+        min={spec.min}
+        max={spec.max === 'today' ? today : spec.max}
       />
     );
   };

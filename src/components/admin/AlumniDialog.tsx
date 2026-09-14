@@ -76,8 +76,12 @@ const AlumniDialog = ({ row, onClose, onSave }: Props) => {
             <input
               className="form-control"
               required
+              inputMode="numeric"
+              maxLength={10}
+              minLength={10}
+              placeholder="10 digit angka"
               value={values.nisn ?? ''}
-              onChange={(e) => set('nisn', e.target.value)}
+              onChange={(e) => set('nisn', e.target.value.replace(/\D/g, '').slice(0, 10))}
             />
           </label>
 
@@ -85,8 +89,11 @@ const AlumniDialog = ({ row, onClose, onSave }: Props) => {
             <span className="field__label">NIK</span>
             <input
               className="form-control"
+              inputMode="numeric"
+              maxLength={16}
+              placeholder="16 digit angka"
               value={values.nik ?? ''}
-              onChange={(e) => set('nik', e.target.value)}
+              onChange={(e) => set('nik', e.target.value.replace(/\D/g, '').slice(0, 16))}
             />
           </label>
 
@@ -155,8 +162,10 @@ const AlumniDialog = ({ row, onClose, onSave }: Props) => {
             <span className="field__label">Nomor HP</span>
             <input
               className="form-control"
+              inputMode="numeric"
+              maxLength={15}
               value={values.no_telepon ?? ''}
-              onChange={(e) => set('no_telepon', e.target.value)}
+              onChange={(e) => set('no_telepon', e.target.value.replace(/\D/g, '').slice(0, 15))}
             />
           </label>
         </div>

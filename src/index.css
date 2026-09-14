@@ -1447,3 +1447,23 @@ textarea.form-control {
     height: 42px;
   }
 }
+
+/* Required marker and per-field hint text */
+.field__req {
+  color: var(--danger);
+  margin-left: 4px;
+}
+
+.field__hint {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-400);
+}
+
+.field__hint.is-error {
+  color: var(--danger);
+}
+
+.form-control[aria-invalid='true'] {
+  border-color: var(--danger);
+}

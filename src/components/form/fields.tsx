@@ -18,6 +18,20 @@ interface TextFieldProps extends BaseProps {
   onChange: (name: string, value: string) => void;
   placeholder?: string;
   type?: string;
+  /** Hard cap on characters, enforced while typing as well as by the browser. */
+  maxLength?: number;
+  /**
+   * Minimum length. Set explicitly — deriving it from maxLength made
+   * variable-length fields like a phone number demand an exact count and
+   * silently refuse to submit.
+   */
+  minLength?: number;
+  /** Digits only: strips anything else as it is typed, and shows a numeric keypad. */
+  numeric?: boolean;
+  min?: string | number;
+  max?: string | number;
+  /** Shown under the field once the value is present but invalid. */
+  hint?: string;
 }
 
 export const TextField = ({
@@ -30,30 +44,61 @@ export const TextField = ({
   onChange,
   placeholder,
   type = 'text',
-}: TextFieldProps) => (
-  <div className={`field${wide ? ' field--wide' : ''}`}>
-    <label className="field__label" htmlFor={name}>
-      {label}
-    </label>
-    <div className="field__control">
-      {Icon && (
-        <span className="field__icon" aria-hidden="true">
-          <Icon size={20} />
+  maxLength,
+  minLength,
+  numeric,
+  min,
+  max,
+  hint,
+}: TextFieldProps) => {
+  const handle = (raw: string) => {
+    // Filter as the user types rather than only rejecting on submit, so a
+    // pasted value with spaces or dashes is cleaned instead of refused.
+    let next = numeric ? raw.replace(/\D/g, '') : raw;
+    if (maxLength !== undefined) next = next.slice(0, maxLength);
+    onChange(name, next);
+  };
+
+  const tooShort = Boolean(hint && value && minLength && value.length < minLength);
+
+  return (
+    <div className={`field${wide ? ' field--wide' : ''}`}>
+      <label className="field__label" htmlFor={name}>
+        {label}
+        {required && <span aria-hidden="true" className="field__req">*</span>}
+      </label>
+      <div className="field__control">
+        {Icon && (
+          <span className="field__icon" aria-hidden="true">
+            <Icon size={20} />
+          </span>
+        )}
+        <input
+          id={name}
+          name={name}
+          type={type}
+          inputMode={numeric ? 'numeric' : undefined}
+          className={`form-control${Icon ? ' form-control--with-icon' : ''}`}
+          placeholder={placeholder}
+          value={value}
+          required={required}
+          maxLength={maxLength}
+          minLength={minLength}
+          min={min}
+          max={max}
+          aria-invalid={tooShort || undefined}
+          aria-describedby={hint ? `${name}-hint` : undefined}
+          onChange={(e) => handle(e.target.value)}
+        />
+      </div>
+      {hint && (
+        <span id={`${name}-hint`} className={`field__hint${tooShort ? ' is-error' : ''}`}>
+          {hint}
         </span>
       )}
-      <input
-        id={name}
-        name={name}
-        type={type}
-        className={`form-control${Icon ? ' form-control--with-icon' : ''}`}
-        placeholder={placeholder}
-        value={value}
-        required={required}
-        onChange={(e) => onChange(name, e.target.value)}
-      />
     </div>
-  </div>
-);
+  );
+};
 
 interface SelectFieldProps extends BaseProps {
   value: string;
@@ -76,6 +121,7 @@ export const SelectField = ({
   <div className={`field${wide ? ' field--wide' : ''}`}>
     <label className="field__label" htmlFor={name}>
       {label}
+      {required && <span aria-hidden="true" className="field__req">*</span>}
     </label>
     <div className="field__control">
       {Icon && (

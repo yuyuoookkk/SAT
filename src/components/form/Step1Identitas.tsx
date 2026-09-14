@@ -29,6 +29,7 @@ const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
           placeholder="Contoh: I Putu Gede Prasetya"
           value={str('namaLengkap')}
           onChange={setField}
+          maxLength={100}
           required
           wide
         />
@@ -40,6 +41,10 @@ const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
           placeholder="10 digit nomor NISN"
           value={str('nisn')}
           onChange={setField}
+          numeric
+          maxLength={10}
+          minLength={10}
+          hint="Tepat 10 digit angka."
           required
         />
 
@@ -95,6 +100,8 @@ const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
           placeholder="0812xxxxxxx"
           value={str('noTelepon')}
           onChange={setField}
+          numeric
+          maxLength={15}
           required
         />
 
@@ -122,7 +129,11 @@ const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
           <Info size={14} />
           Verifikasi keakuratan data sebelum melanjutkan kuesioner.
         </span>
-        <button type="submit" className="btn btn-primary" disabled={!str('statusSaatIni')}>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={!str('statusSaatIni') || str('nisn').length !== 10}
+        >
           Lanjut ke Status Pekerjaan
           <ArrowRight size={16} />
         </button>
