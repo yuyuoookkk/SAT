@@ -300,3 +300,42 @@ export async function fetchPublicStats(): Promise<PublicStats> {
   if (error) throw error;
   return data as PublicStats;
 }
+
+/**
+ * Every questionnaire response, for the admin export.
+ *
+ * PostgREST caps a single request (1000 rows by default), so this pages
+ * through in batches rather than asking for everything at once — an export of
+ * 2,000 respondents silently truncated at 1,000 would be worse than no export.
+ * `onProgress` lets the caller show how far along it is.
+ */
+export async function fetchAllResponses(
+  onProgress?: (loaded: number, total: number) => void,
+): Promise<Record<string, unknown>[]> {
+  const BATCH = 1000;
+  const all: Record<string, unknown>[] = [];
+  let from = 0;
+  let total = 0;
+
+  for (;;) {
+    const { data, error, count } = await supabase
+      .from('tracer_study')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, from + BATCH - 1);
+
+    if (error) throw error;
+    if (count !== null) total = count;
+
+    const batch = (data ?? []) as Record<string, unknown>[];
+    all.push(...batch);
+    onProgress?.(all.length, total);
+
+    // Stop on a short batch, and guard against a server that ignores `range`
+    // and keeps returning the same rows.
+    if (batch.length < BATCH || all.length >= total) break;
+    from += BATCH;
+  }
+
+  return all;
+}

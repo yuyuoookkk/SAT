@@ -18,7 +18,8 @@ import {
   upsertAlumni,
 } from '../../lib/adminData';
 import type { AlumniOverviewRow, AlumniRow } from '../../lib/adminData';
-import { avatarTint, formatDate, formatTimeWita, initials } from '../../lib/format';
+import { downloadAllResponses } from '../../lib/exportResponses';
+import { avatarTint, formatDate, formatNumber, formatTimeWita, initials } from '../../lib/format';
 import { JURUSAN } from '../../lib/tracerStudy';
 
 const PAGE_SIZE = 8;
@@ -37,6 +38,7 @@ const AkunSiswa = () => {
   const [editing, setEditing] = useState<AlumniRow | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const [exporting, setExporting] = useState<string | null>(null);
 
   // Filter changes return to page 1 — handled here rather than in an effect so
   // one interaction causes one render and one fetch.
@@ -92,22 +94,29 @@ const AkunSiswa = () => {
     }
   };
 
-  const exportCsv = () => {
-    const header = ['NISN', 'NIK', 'Nama Lengkap', 'Jenis Kelamin', 'Jurusan', 'Angkatan', 'Email', 'No HP', 'Status'];
-    const body = rows.map((r) =>
-      [r.nisn, r.nik, r.nama_lengkap, r.jenis_kelamin, r.jurusan, r.angkatan, r.email, r.no_telepon,
-       r.sudah_mengisi ? 'Aktif' : 'Tidak Aktif']
-        .map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`)
-        .join(','),
-    );
-    const url = URL.createObjectURL(
-      new Blob([[header.join(','), ...body].join('\n')], { type: 'text/csv;charset=utf-8' }),
-    );
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `akun-siswa-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  /**
+   * Exports every questionnaire response, not just the rows on screen.
+   * Paging through the whole table can take a moment on a large cohort, so the
+   * button reports progress rather than appearing to hang.
+   */
+  const exportAll = async () => {
+    setError(null);
+    setNotice(null);
+    setExporting('Menyiapkan…');
+    try {
+      const count = await downloadAllResponses((loaded, total) => {
+        setExporting(`Mengambil ${formatNumber(loaded)} / ${formatNumber(total)}…`);
+      });
+      setNotice(
+        count === 0
+          ? 'Belum ada alumni yang mengisi kuisioner, jadi tidak ada data untuk diunduh.'
+          : `${formatNumber(count)} data hasil kuisioner berhasil diunduh.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal mengunduh data kuisioner.');
+    } finally {
+      setExporting(null);
+    }
   };
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -117,9 +126,15 @@ const AkunSiswa = () => {
       <div className="admin-head">
         <h1>Detail Data Alumni &amp; Hasil Kuesioner Tracer Study</h1>
         <div className="admin-head__actions">
-          <button type="button" className="admin-btn admin-btn--soft" onClick={exportCsv}>
+          <button
+            type="button"
+            className="admin-btn admin-btn--soft"
+            onClick={() => void exportAll()}
+            disabled={exporting !== null}
+            title="Unduh seluruh hasil kuisioner sebagai file Excel"
+          >
             <FileSpreadsheet size={16} />
-            Export
+            {exporting ?? 'Export'}
           </button>
           <button
             type="button"
