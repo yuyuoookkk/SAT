@@ -15,6 +15,10 @@ interface Props {
   size?: number;
   thickness?: number;
   title: string;
+  /** Render the plot first and the heading beneath it, as the design does. */
+  headingBelow?: string;
+  /** Hide the legend when the caller supplies its own readout. */
+  hideLegend?: boolean;
 }
 
 /**
@@ -33,6 +37,8 @@ const DonutChart = ({
   size = 192,
   thickness = 24,
   title,
+  headingBelow,
+  hideLegend,
 }: Props) => {
   const [hover, setHover] = useState<number | null>(null);
   const tableId = useId();
@@ -101,7 +107,17 @@ const DonutChart = ({
         )}
       </div>
 
-      {/* Legend: name + percentage, so identity never rests on colour alone. */}
+      {headingBelow && (
+        <div className="donut__heading">
+          <h3>{headingBelow}</h3>
+          <span className="donut__more" aria-hidden="true">⋮</span>
+        </div>
+      )}
+
+      {/* Legend: name + percentage, so identity never rests on colour alone.
+          Rendered conditionally — the `hidden` attribute alone loses to this
+          class's `display: flex`. */}
+      {!hideLegend && (
       <ul className="donut__legend">
         {slices.map((slice, i) => (
           <li
@@ -116,6 +132,7 @@ const DonutChart = ({
           </li>
         ))}
       </ul>
+      )}
 
       <table className="sr-only">
         <caption>{title}</caption>

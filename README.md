@@ -40,6 +40,11 @@ supabase db push
   row, so a respondent appears under "Akun Siswa" straight away and the
   Total/Sudah/Belum counts stay honest. Also constrains `nisn` to 10 digits
   (added NOT VALID, so existing rows are untouched).
+- `0006_admin_alumni_overview.sql` adds the view behind the "Akun Siswa"
+  table, carrying each alumnus's Aktif / Tidak Aktif state. That state is
+  derived (has the alumnus filed a response?) rather than stored, so it cannot
+  drift. The view sets `security_invoker = true`; without it a view runs with
+  its owner's rights and would hand the whole roster to any caller.
 - `0003_public_stats.sql` adds `public_tracer_stats()`, the only thing an
   anonymous visitor may call. It returns aggregate counts and percentages and
   never a row, so the landing page can show live figures while the underlying

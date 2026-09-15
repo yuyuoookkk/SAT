@@ -59,7 +59,7 @@ export interface ResponseRow {
 /** Human labels for the identifiers stored in `status_saat_ini`. */
 export const STATUS_LABEL: Record<string, string> = {
   bekerja: 'Bekerja',
-  kuliah: 'Kuliah',
+  kuliah: 'Melanjutkan Kuliah',
   wirausaha: 'Wirausaha',
   belum_bekerja: 'Belum Bekerja',
   bekerja_kuliah: 'Bekerja & Kuliah',
@@ -125,6 +125,47 @@ export async function fetchAlumni(
   const { data, error, count } = await q;
   if (error) throw error;
   return { rows: (data ?? []) as AlumniRow[], total: count ?? 0 };
+}
+
+/** A roster row plus whether that alumnus has actually responded. */
+export interface AlumniOverviewRow extends AlumniRow {
+  sudah_mengisi: boolean;
+  terakhir_mengisi: string | null;
+}
+
+export interface AlumniFilters {
+  search?: string;
+  jurusan?: string;
+  /** '' = any, 'aktif' = has responded, 'tidak' = has not. */
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+/** Roster page for "Akun Siswa", backed by the view from migration 0006. */
+export async function fetchAlumniOverview(
+  f: AlumniFilters = {},
+): Promise<Page<AlumniOverviewRow>> {
+  const { search = '', jurusan = '', status = '', page = 1, pageSize = 8 } = f;
+  const from = (page - 1) * pageSize;
+
+  let q = supabase
+    .from('admin_alumni_overview')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(from, from + pageSize - 1);
+
+  if (jurusan) q = q.eq('jurusan', jurusan);
+  if (status === 'aktif') q = q.eq('sudah_mengisi', true);
+  if (status === 'tidak') q = q.eq('sudah_mengisi', false);
+  if (search.trim()) {
+    const term = `%${search.trim()}%`;
+    q = q.or(`nama_lengkap.ilike.${term},nisn.ilike.${term},jurusan.ilike.${term}`);
+  }
+
+  const { data, error, count } = await q;
+  if (error) throw error;
+  return { rows: (data ?? []) as AlumniOverviewRow[], total: count ?? 0 };
 }
 
 export interface ResponseFilters {

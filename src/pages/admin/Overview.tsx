@@ -114,7 +114,7 @@ const Overview = () => {
       <div className="admin-head">
         <div>
           <h1>Dashboard Overview</h1>
-          <p>Real-time statistics for SMK TI Bali Global alumni career progress.</p>
+          <p>Real-time statistics of SMK TI Bali Global alumni career progress.</p>
         </div>
         <div className="admin-head__actions">
           <select
@@ -173,9 +173,9 @@ const Overview = () => {
 
           <section className="admin-grid admin-grid--charts">
             <article className="admin-card">
-              <h2 className="admin-card__title">Status Alumni</h2>
               <DonutChart
                 title="Distribusi status alumni"
+                headingBelow="Status Alumni"
                 slices={slices}
                 centerValue={`${formatPercent(s.bekerja, responded)}%`}
                 centerCaption="Bekerja"
@@ -200,27 +200,37 @@ const Overview = () => {
             <article className="admin-card">
               <h2 className="admin-card__title">Kesesuaian Jurusan</h2>
               <p className="admin-card__sub">Link and Match index with industry</p>
-              <DonutChart
-                title="Kesesuaian pekerjaan dengan jurusan"
-                size={168}
-                thickness={20}
-                slices={[
-                  { label: 'Sesuai Jurusan', value: matched, color: '#0b5ed7' },
-                  { label: 'Tidak Sesuai', value: rated - matched, color: '#6b7a99' },
-                ]}
-                centerValue={`${matchPct}%`}
-                centerCaption="MATCHED"
-              />
-              <dl className="matchlist">
-                <div>
-                  <dt>Sesuai Jurusan</dt>
-                  <dd>{formatNumber(matched)}</dd>
-                </div>
-                <div>
-                  <dt>Tidak Sesuai</dt>
-                  <dd>{formatNumber(Math.max(rated - matched, 0))}</dd>
-                </div>
-              </dl>
+              <div className="matchrow">
+                <DonutChart
+                  title="Kesesuaian pekerjaan dengan jurusan"
+                  size={140}
+                  thickness={18}
+                  hideLegend
+                  slices={[
+                    { label: 'Sesuai Jurusan', value: matched, color: '#0b5ed7' },
+                    { label: 'Tidak Sesuai', value: rated - matched, color: '#c9ced9' },
+                  ]}
+                  centerValue={`${matchPct}%`}
+                  centerCaption="MATCHED"
+                />
+                <dl className="matchbars">
+                  <div>
+                    <dt>Sesuai Jurusan<dd>{formatNumber(matched)}</dd></dt>
+                    <span className="matchbars__track">
+                      <span className="matchbars__fill" style={{ width: `${matchPct}%` }} />
+                    </span>
+                  </div>
+                  <div>
+                    <dt>Tidak Sesuai<dd>{formatNumber(Math.max(rated - matched, 0))}</dd></dt>
+                    <span className="matchbars__track">
+                      <span
+                        className="matchbars__fill matchbars__fill--muted"
+                        style={{ width: `${100 - matchPct}%` }}
+                      />
+                    </span>
+                  </div>
+                </dl>
+              </div>
             </article>
 
             <article className="admin-card">

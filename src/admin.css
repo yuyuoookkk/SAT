@@ -1322,3 +1322,363 @@
 @media (max-width: 420px) {
   .auth__card { padding: 28px 20px 24px; }
 }
+
+/* ===========================================================================
+   Admin panel — second design pass
+   =========================================================================== */
+
+/* Soft outline button (Export / Import) */
+.admin-btn--soft {
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  color: var(--admin-ink-soft);
+}
+
+.admin-btn--soft:hover {
+  border-color: var(--brand-500);
+  color: var(--brand-700);
+}
+
+/* Donut heading rendered beneath the plot */
+.donut__heading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.donut__heading h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--admin-ink);
+}
+
+.donut__more {
+  color: var(--admin-ink-mute);
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Link & Match: donut beside labelled bars */
+.matchrow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.matchrow .donut {
+  padding-top: 0;
+  gap: 0;
+}
+
+.matchbars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.matchbars > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-sm);
+}
+
+.matchbars dt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-brand);
+  font-size: 12px;
+  color: var(--admin-ink-soft);
+}
+
+.matchbars dd {
+  margin: 0;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--admin-ink);
+}
+
+.matchbars__track {
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background-color: var(--admin-track);
+  overflow: hidden;
+}
+
+.matchbars__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--brand-500);
+}
+
+.matchbars__fill--muted {
+  background-color: #c9ced9;
+}
+
+/* ---------------------------------------------------------------------------
+   KPI cards on Data Kuisioner
+   -------------------------------------------------------------------------- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.kpi {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 24px;
+  background-color: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+/* The faint circle in the corner of each card */
+.kpi::after {
+  content: '';
+  position: absolute;
+  right: -40px;
+  bottom: -55px;
+  width: 150px;
+  height: 150px;
+  border-radius: var(--radius-pill);
+  background-color: var(--kpi-tint);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.kpi > * {
+  position: relative;
+  z-index: 1;
+}
+
+.kpi header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.kpi__label {
+  font-family: var(--font-brand);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--admin-ink-mute);
+}
+
+.kpi__icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+  background-color: var(--kpi-tint);
+  color: var(--kpi-ink);
+}
+
+.kpi__value {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 38px;
+  color: var(--admin-ink);
+}
+
+.kpi__value small {
+  font-family: var(--font-brand);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--admin-ink-mute);
+}
+
+.kpi__chip {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background-color: var(--kpi-tint);
+  color: var(--kpi-ink);
+  font-family: var(--font-brand);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.kpi__meter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kpi__meterlabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-brand);
+  font-size: 11px;
+  color: var(--admin-ink-mute);
+}
+
+.kpi__meterlabel b {
+  color: var(--admin-ink);
+}
+
+.kpi__track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--admin-track);
+  overflow: hidden;
+}
+
+.kpi__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--brand-500);
+}
+
+.kpi--violet { --kpi-tint: #ede4ff; --kpi-ink: #6f46b9; }
+.kpi--blue   { --kpi-tint: #dbe7ff; --kpi-ink: #0b5ed7; }
+.kpi--green  { --kpi-tint: #dcfce7; --kpi-ink: #15803d; }
+.kpi--amber  { --kpi-tint: #fdeccd; --kpi-ink: #b45309; }
+
+/* ---------------------------------------------------------------------------
+   Roster table (Akun Siswa)
+   -------------------------------------------------------------------------- */
+.roster-head {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(130px, 1fr));
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.roster-head .admin-search--inline {
+  max-width: none;
+}
+
+.roster-table tbody td {
+  padding: 14px 20px;
+}
+
+/* NISN · NIK side by side, as in the design */
+.cell-ids {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.cell-ids__dot {
+  width: 3px;
+  height: 3px;
+  margin-top: 7px;
+  border-radius: var(--radius-pill);
+  background-color: var(--admin-line);
+  flex-shrink: 0;
+}
+
+.cell-badge--p { background-color: #fce7f3; color: #be185d; }
+.cell-badge--l { background-color: var(--brand-100); color: var(--brand-700); }
+
+/* Aktif / Tidak Aktif */
+.dot-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-brand);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.dot-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background-color: currentColor;
+}
+
+.dot-status--on  { color: #15803d; }
+.dot-status--off { color: #dc2626; }
+
+.icon-btn--bare {
+  border-color: transparent;
+  background: transparent;
+}
+
+.icon-btn--bare:hover {
+  border-color: var(--admin-line);
+}
+
+/* Result bar above the questionnaire table */
+.admin-resultbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 24px 0;
+  font-family: var(--font-brand);
+  font-size: 12px;
+  color: var(--admin-ink-mute);
+}
+
+.admin-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  background-color: var(--brand-100);
+  color: var(--brand-700);
+  font-weight: 600;
+}
+
+/* Status pill gains a leading dot */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background-color: currentColor;
+}
+
+.admin-pagination__of {
+  color: var(--admin-ink-mute);
+}
+
+@media (max-width: 1100px) {
+  .kpi-grid { grid-template-columns: minmax(0, 1fr); }
+  .matchrow { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .matchbars { width: 100%; }
+}
+
+@media (max-width: 760px) {
+  .roster-head { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Link & Match bars need the room the legend was taking */
+.matchrow { grid-template-columns: auto minmax(120px, 1fr); gap: 16px; }
+.matchbars dt { flex-direction: column; align-items: flex-start; gap: 2px; }
+.matchbars > div { padding: 8px 10px; }
