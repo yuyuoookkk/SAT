@@ -14,7 +14,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import { ChoiceGroup, Scale, SelectField, TextField } from './fields';
+import { ChoiceGroup, EmojiScale, Scale, SelectField, TextField } from './fields';
 import type { FieldSpec, FormData, StatusKegiatan } from '../../lib/tracerStudy';
 import { SECTIONS, STATUS_SECTIONS } from '../../lib/tracerStudy';
 
@@ -134,22 +134,36 @@ const Step2Status: React.FC<Props> = ({ formData, setField, nextStep, prevStep }
                   options={section.choice.options}
                   value={(formData[section.choice.name] as string) ?? ''}
                   onChange={setField}
+                  columns={3}
                 />
               )}
 
-              {section.scales.map((scale) => (
-                <div className="form-block" key={scale.name}>
-                  <Scale
-                    label={scale.label}
-                    name={scale.name}
-                    value={formData[scale.name] as number | undefined}
-                    onChange={setField}
-                    lowLabel={scale.lowLabel}
-                    highLabel={scale.highLabel}
-                    caption={scale.caption}
-                  />
-                </div>
-              ))}
+              {/* Alignment is a 1-5 judgement; satisfaction is a feeling, so the
+                  design asks for it with faces. */}
+              <div className="scale-pair">
+                {section.scales.map((scale) =>
+                  scale.lowLabel ? (
+                    <Scale
+                      key={scale.name}
+                      label={scale.label}
+                      name={scale.name}
+                      value={formData[scale.name] as number | undefined}
+                      onChange={setField}
+                      lowLabel={scale.lowLabel}
+                      highLabel={scale.highLabel}
+                    />
+                  ) : (
+                    <EmojiScale
+                      key={scale.name}
+                      label={scale.label}
+                      name={scale.name}
+                      value={formData[scale.name] as number | undefined}
+                      onChange={setField}
+                      caption={scale.caption}
+                    />
+                  ),
+                )}
+              </div>
             </div>
           </section>
         );

@@ -39,6 +39,8 @@ const Step3Evaluasi: React.FC<Props> = ({
         </p>
       </div>
 
+      <h4 className="form-section__title">Penilaian Fasilitas &amp; Layanan</h4>
+
       <div className="form-block">
         {EVALUATION_ROWS.map((row) => (
           <RateRow
@@ -76,7 +78,7 @@ const Step3Evaluasi: React.FC<Props> = ({
           Kembali
         </button>
         <button type="submit" className="btn btn-primary" disabled={!complete || isSubmitting}>
-          {isSubmitting ? 'Mengirim…' : 'Kirim Tracer Study'}
+          {isSubmitting ? 'Mengirim…' : 'Kirim Data Tracer Study'}
           <Send size={16} />
         </button>
       </div>

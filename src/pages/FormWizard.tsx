@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Info, LifeBuoy, ShieldCheck } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import StepIndicator from '../components/ui/StepIndicator';
@@ -7,6 +6,7 @@ import Step1Identitas from '../components/form/Step1Identitas';
 import Step2Status from '../components/form/Step2Status';
 import Step3Evaluasi from '../components/form/Step3Evaluasi';
 import Step4Selesai from '../components/form/Step4Selesai';
+import FormAside from '../components/form/FormAside';
 import { supabase } from '../lib/supabase';
 import { useAdminAuth } from '../lib/adminAuthContext';
 import type { FormData } from '../lib/tracerStudy';
@@ -33,11 +33,11 @@ const BAND = [
  */
 const STATUS_DB_VALUE: Record<string, string> = {
   Bekerja: 'bekerja',
-  'Melanjutkan Pendidikan': 'kuliah',
+  Kuliah: 'kuliah',
   'Bekerja Sambil Kuliah': 'bekerja_kuliah',
-  Wiraswasta: 'wirausaha',
-  'Belum Bekerja': 'belum_bekerja',
+  Wirausaha: 'wirausaha',
   'Kuliah Sambil Berwirausaha': 'kuliah_wirausaha',
+  'Belum Bekerja': 'belum_bekerja',
 };
 
 const FormWizard = () => {
@@ -199,20 +199,17 @@ const FormWizard = () => {
       <Header />
 
       <main className="main-content">
-        {step === 1 && (
-          <section className="form-band">
-            <div className="container form-band__inner">
-              <h2>{band.title}</h2>
-              <p>{band.lede}</p>
-            </div>
-          </section>
-        )}
-
         <div className="container">
           <StepIndicator current={step} />
 
-          <div className="form-layout">
+          <div className={`form-layout${step === 1 ? ' form-layout--single' : ''}`}>
             <div className="form-panel">
+              {step === 1 && (
+                <div className="form-panel__band">
+                  <h2>{band.title}</h2>
+                  <p>{band.lede}</p>
+                </div>
+              )}
               {step === 1 && (
                 <Step1Identitas formData={data} setField={setField} nextStep={nextStep} />
               )}
@@ -236,55 +233,29 @@ const FormWizard = () => {
               )}
             </div>
 
-            <aside className="form-aside">
-              <div className="info-card info-card--tint">
-                <span className="info-card__icon">
-                  <ShieldCheck size={24} />
-                </span>
-                <div>
-                  <h4>Pentingnya Evaluasi</h4>
-                  <p>
-                    Penilaian Anda sangat berharga untuk proses akreditasi sekolah dan penjaminan
-                    mutu pendidikan.
-                  </p>
-                  <ul>
-                    <li>Dipakai dalam pembaruan kurikulum</li>
-                    <li>Menjaga relevansi dengan kebutuhan industri</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="info-card">
-                <span className="info-card__icon">
-                  <LifeBuoy size={24} />
-                </span>
-                <div>
-                  <h4>Butuh Bantuan?</h4>
-                  <p>
-                    Jika Anda memiliki kendala dalam mengisi form ini, silakan hubungi tim Tracer
-                    Study kami.
-                  </p>
-                  <p style={{ marginTop: 8 }}>
-                    <a href="mailto:info@smktibaliglobaljimbaran.sch.id">
-                      info@smktibaliglobaljimbaran.sch.id
-                    </a>
-                  </p>
-                </div>
-              </div>
-
-              <div className="info-card">
-                <span className="info-card__icon">
-                  <Info size={24} />
-                </span>
-                <div>
-                  <h4>Data Anda Aman</h4>
-                  <p>
-                    Informasi yang Anda kirimkan hanya digunakan untuk keperluan internal sekolah
-                    dan tidak dibagikan kepada pihak ketiga.
-                  </p>
-                </div>
-              </div>
-            </aside>
+            {step !== 1 && (step === 3 ? (
+              <FormAside
+                title="Pentingnya Evaluasi"
+                paragraphs={[
+                  'Penilaian Anda sangat berharga untuk proses akreditasi sekolah dan penjaminan mutu pendidikan.',
+                  'Hasil evaluasi ini akan digunakan sebagai bahan pertimbangan dalam memperbarui kurikulum agar tetap relevan dengan kebutuhan industri saat ini.',
+                ]}
+                bullets={['Peningkatan mutu lulusan', 'Update kurikulum industri']}
+              />
+            ) : (
+              <FormAside
+                title="Mengapa data ini penting?"
+                paragraphs={[
+                  'Data pekerjaan Anda membantu SMK TI Bali Global Jimbaran mengevaluasi efektivitas kurikulum yang diajarkan.',
+                  'Informasi ini menjadi basis data untuk akreditasi sekolah dan membantu kami membangun kemitraan industri yang lebih kuat bagi adik-adik kelas Anda.',
+                ]}
+                bullets={[
+                  'Pemetaan industri alumni',
+                  'Peningkatan sarana Lab IT',
+                  'Program Alumni Career Talk',
+                ]}
+              />
+            ))}
           </div>
         </div>
       </main>

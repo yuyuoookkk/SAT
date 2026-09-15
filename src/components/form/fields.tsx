@@ -195,15 +195,27 @@ interface ChoiceGroupProps {
   value: string;
   options: string[];
   onChange: (name: string, value: string) => void;
+  /** Grid columns; the design uses three. */
+  columns?: number;
 }
 
 /** Radio cards — Figma nodes 3435:322, 3442:365. */
-export const ChoiceGroup = ({ label, name, value, options, onChange }: ChoiceGroupProps) => (
+export const ChoiceGroup = ({
+  label,
+  name,
+  value,
+  options,
+  onChange,
+  columns = 2,
+}: ChoiceGroupProps) => (
   <fieldset className="form-block" style={{ border: 'none' }}>
     <legend className="scale__label" style={{ marginBottom: 12 }}>
       {label}
     </legend>
-    <div className="choice-grid">
+    <div
+      className="choice-grid"
+      style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+    >
       {options.map((opt) => (
         <label
           key={opt}
@@ -270,6 +282,50 @@ export const Scale = ({
       </div>
     )}
     {caption && <span className="scale__caption">{caption}</span>}
+  </div>
+);
+
+/** Faces for the satisfaction scales, 1 (worst) to 5 (best). */
+const FACES = [
+  { face: '\u{1F620}', label: 'Sangat tidak puas' },
+  { face: '\u{1F641}', label: 'Kurang puas' },
+  { face: '\u{1F610}', label: 'Biasa saja' },
+  { face: '\u{1F642}', label: 'Puas' },
+  { face: '\u{1F929}', label: 'Sangat puas' },
+];
+
+interface EmojiScaleProps {
+  label: string;
+  name: string;
+  value: number | undefined;
+  onChange: (name: string, value: number) => void;
+  caption?: string;
+}
+
+/** Satisfaction, expressed as faces rather than numbers. */
+export const EmojiScale = ({ label, name, value, onChange, caption }: EmojiScaleProps) => (
+  <div className="emoji-scale">
+    <span className="scale__label" id={`${name}-label`}>{label}</span>
+    <div className="emoji-scale__row" role="radiogroup" aria-labelledby={`${name}-label`}>
+      {FACES.map((f, i) => {
+        const n = i + 1;
+        return (
+          <button
+            key={n}
+            type="button"
+            role="radio"
+            aria-checked={value === n}
+            aria-label={`${label}: ${f.label}`}
+            title={f.label}
+            className={`emoji-scale__btn${value === n ? ' is-on' : ''}`}
+            onClick={() => onChange(name, n)}
+          >
+            <span aria-hidden="true">{f.face}</span>
+          </button>
+        );
+      })}
+    </div>
+    {caption && <span className="emoji-scale__caption">{caption}</span>}
   </div>
 );
 

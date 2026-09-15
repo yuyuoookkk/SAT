@@ -1,6 +1,6 @@
 import type React from 'react';
 import { Link } from 'react-router-dom';
-import { BadgeCheck, Check, Download, Home } from 'lucide-react';
+import { Check, Download, Home } from 'lucide-react';
 
 /** Step 4 — Figma node 3442:956 ("Berhasil Dikirim!"). */
 const Step4Selesai: React.FC = () => (
@@ -17,7 +17,7 @@ const Step4Selesai: React.FC = () => (
       akademik SMK TI Bali Global Jimbaran.
     </p>
 
-    <div className="done__actions">
+    <div className="done__actions done__actions--row">
       <button type="button" className="btn btn-primary" onClick={() => window.print()}>
         <Download size={16} />
         Download Bukti Pengisian (PDF)
@@ -28,18 +28,6 @@ const Step4Selesai: React.FC = () => (
       </Link>
     </div>
 
-    <div className="info-card" style={{ textAlign: 'left' }}>
-      <span className="info-card__icon">
-        <BadgeCheck size={36} />
-      </span>
-      <div>
-        <h4>Informasi Sertifikat</h4>
-        <p>
-          Sertifikat Tracer Study juga telah dikirimkan ke alamat email terdaftar Anda. Jika belum
-          menerima, silakan periksa folder spam atau hubungi admin sekolah.
-        </p>
-      </div>
-    </div>
   </div>
 );
 

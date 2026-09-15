@@ -1,12 +1,7 @@
 import { Link } from 'react-router-dom';
+import { Bell, Settings } from 'lucide-react';
 
-/**
- * Top app bar — Figma node 3428:823 / 3435:385.
- *
- * The crest artwork could not be exported from Figma in this environment, so
- * the mark falls back to a monogram badge. Drop the real file into
- * `src/assets/` and swap the `<span>` for an `<img className="topbar__logo">`.
- */
+/** Slim public top bar: brand on the left, utilities on the right. */
 const Header = () => (
   <header className="topbar">
     <div className="container topbar__inner">
@@ -17,23 +12,14 @@ const Header = () => (
         <span className="topbar__name">SMK TI Bali Global Jimbaran</span>
       </Link>
 
-      <nav className="topbar__nav">
-        <Link className="topbar__link" to="/">
-          Beranda
+      <div className="topbar__tools">
+        <button type="button" className="topbar__icon" aria-label="Notifikasi">
+          <Bell size={18} />
+        </button>
+        <Link to="/auth" className="topbar__icon" aria-label="Masuk atau pengaturan akun">
+          <Settings size={18} />
         </Link>
-        <a className="topbar__link" href="#tentang">
-          Tentang
-        </a>
-        <a className="topbar__link" href="#statistik">
-          Statistik
-        </a>
-        <Link className="topbar__link" to="/auth">
-          Masuk
-        </Link>
-        <Link className="btn btn-accent" to="/tracer-form">
-          Isi Tracer Study
-        </Link>
-      </nav>
+      </div>
     </div>
   </header>
 );

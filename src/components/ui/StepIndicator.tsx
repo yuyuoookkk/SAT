@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 
-const STEPS = ['Identitas', 'Informasi', 'Evaluasi', 'Selesai'];
+const STEPS = ['Identitas', 'Informasi Kegiatan', 'Evaluasi', 'Selesai'];
 
 interface Props {
   /** 1-based index of the step currently being filled in. */

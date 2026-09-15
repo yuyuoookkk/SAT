@@ -131,10 +131,15 @@ const LandingPage = () => {
               Selamat datang di portal resmi pelacakan jejak alumni. Platform ini didedikasikan untuk
               mengumpulkan data karir dan pendidikan lanjut Anda guna memajukan kualitas almamater.
             </p>
-            <Link className="btn btn-accent" to="/tracer-form">
-              Mulai Isi Tracer Study
-              <ArrowRight size={16} />
-            </Link>
+            <div className="hero__actions">
+              <Link className="btn btn-accent" to="/tracer-form">
+                Mulai Isi Tracer Study
+                <ArrowRight size={16} />
+              </Link>
+              <a className="btn btn-onblue" href="#statistik">
+                Lihat Panduan Data
+              </a>
+            </div>
           </div>
 
           <div className="bento">
@@ -165,7 +170,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div className="feature-grid">
+          <div className="feature-list">
             {features.map(({ icon: Icon, title, body }) => (
               <article className="feature" key={title}>
                 <span className="feature__icon">

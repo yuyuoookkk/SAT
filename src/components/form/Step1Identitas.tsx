@@ -121,6 +121,7 @@ const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
           options={[...STATUS_KEGIATAN]}
           value={str('statusSaatIni')}
           onChange={setField}
+          columns={3}
         />
       </div>
 
@@ -129,6 +130,9 @@ const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
           <Info size={14} />
           Verifikasi keakuratan data sebelum melanjutkan kuesioner.
         </span>
+        <button type="button" className="btn btn-ghost" onClick={() => window.history.back()}>
+          Batal
+        </button>
         <button
           type="submit"
           className="btn btn-primary"

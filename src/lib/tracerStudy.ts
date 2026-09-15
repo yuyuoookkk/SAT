@@ -28,11 +28,11 @@ export const TAHUN_LULUS = Array.from({ length: 16 }, (_, i) => String(CURRENT_Y
 /** Step 1 radio group — Figma nodes 3435:322 … 3440:22. */
 export const STATUS_KEGIATAN = [
   'Bekerja',
-  'Melanjutkan Pendidikan',
+  'Kuliah',
   'Bekerja Sambil Kuliah',
-  'Wiraswasta',
-  'Belum Bekerja',
+  'Wirausaha',
   'Kuliah Sambil Berwirausaha',
+  'Belum Bekerja',
 ] as const;
 
 export type StatusKegiatan = (typeof STATUS_KEGIATAN)[number];
@@ -40,11 +40,11 @@ export type StatusKegiatan = (typeof STATUS_KEGIATAN)[number];
 /** Which step-2 sections each status shows. */
 export const STATUS_SECTIONS: Record<StatusKegiatan, SectionKey[]> = {
   Bekerja: ['work'],
-  'Melanjutkan Pendidikan': ['study'],
+  Kuliah: ['study'],
   'Bekerja Sambil Kuliah': ['work', 'study'],
-  Wiraswasta: ['business'],
-  'Belum Bekerja': ['unemployed'],
+  Wirausaha: ['business'],
   'Kuliah Sambil Berwirausaha': ['study', 'business'],
+  'Belum Bekerja': ['unemployed'],
 };
 
 export type SectionKey = 'work' | 'study' | 'business' | 'unemployed';
