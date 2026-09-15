@@ -4,7 +4,8 @@ React + TypeScript + Vite front end for the alumni Tracer Study questionnaire,
 plus an admin dashboard backed by Supabase.
 
 - `/` — public landing page
-- `/tracer-form` — four-step questionnaire (identitas → informasi → evaluasi → selesai)
+- `/tracer-form` — four-step questionnaire, requires a signed-in alumnus so
+  every response is attributable
 - `/admin` — dashboard overview, `/admin/akun-siswa`, `/admin/data-kuisioner`
 
 ## Setup
@@ -40,6 +41,9 @@ supabase db push
   row, so a respondent appears under "Akun Siswa" straight away and the
   Total/Sudah/Belum counts stay honest. Also constrains `nisn` to 10 digits
   (added NOT VALID, so existing rows are untouched).
+- `0007_require_login_to_submit.sql` requires a signed-in account to file a
+  response: the anon insert policy is removed and a response must carry the
+  submitter's own `user_id`. Apply it after 0005, which it checks for.
 - `0006_admin_alumni_overview.sql` adds the view behind the "Akun Siswa"
   table, carrying each alumnus's Aktif / Tidak Aktif state. That state is
   derived (has the alumnus filed a response?) rather than stored, so it cannot

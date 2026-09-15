@@ -6,6 +6,7 @@ import Overview from './pages/admin/Overview';
 import AkunSiswa from './pages/admin/AkunSiswa';
 import DataKuisioner from './pages/admin/DataKuisioner';
 import RequireAdmin from './components/admin/RequireAdmin';
+import RequireAuth from './components/RequireAuth';
 import { AdminAuthProvider } from './lib/AdminAuthProvider';
 
 function App() {
@@ -25,9 +26,11 @@ function App() {
           <Route
             path="/tracer-form"
             element={
-              <div className="app-container">
-                <FormWizard />
-              </div>
+              <RequireAuth>
+                <div className="app-container">
+                  <FormWizard />
+                </div>
+              </RequireAuth>
             }
           />
 

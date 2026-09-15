@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { useAdminAuth } from '../lib/adminAuthContext';
 
@@ -23,7 +23,13 @@ const COPY: Record<Role, { title: string; blurb: string; after: string }> = {
 const AuthPage = () => {
   const { session, isAdmin, signIn, signUp } = useAdminAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [params, setParams] = useSearchParams();
+
+  // Where the guard bounced them from, so they land back there afterwards.
+  const nav = location.state as { from?: string; reason?: string } | null;
+  const returnTo = nav?.from;
+  const sentFromForm = nav?.reason === 'form';
 
   const role: Role = params.get('role') === 'admin' ? 'admin' : 'user';
   const [mode, setMode] = useState<Mode>(params.get('mode') === 'signup' ? 'signup' : 'login');
@@ -37,7 +43,7 @@ const AuthPage = () => {
 
   // Already signed in: send them where they were trying to go.
   if (session && !notice) {
-    return <Navigate to={role === 'admin' ? '/admin' : '/tracer-form'} replace />;
+    return <Navigate to={returnTo ?? (role === 'admin' ? '/admin' : '/tracer-form')} replace />;
   }
 
   const setRole = (next: Role) => {
@@ -71,7 +77,7 @@ const AuthPage = () => {
     try {
       if (mode === 'login') {
         await signIn(email, password);
-        navigate(COPY[role].after, { replace: true });
+        navigate(returnTo ?? COPY[role].after, { replace: true });
         return;
       }
 
@@ -94,7 +100,7 @@ const AuthPage = () => {
         return;
       }
 
-      navigate(COPY[role].after, { replace: true });
+      navigate(returnTo ?? COPY[role].after, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan. Silakan coba lagi.');
     } finally {
@@ -113,6 +119,13 @@ const AuthPage = () => {
         <span className="auth__logo" aria-hidden="true">SMK</span>
         <h1>Tracer Study Alumni</h1>
         <p className="auth__blurb">{COPY[role].blurb}</p>
+
+        {sentFromForm && (
+          <p className="auth__hint">
+            Kuisioner Tracer Study hanya dapat diisi setelah masuk, agar jawaban Anda tersimpan
+            atas nama Anda dan dapat diverifikasi oleh sekolah.
+          </p>
+        )}
 
         {/* The two role buttons */}
         <div className="auth__roles" role="tablist" aria-label="Pilih jenis akun">
