@@ -27,6 +27,9 @@ const Header = () => (
         <a className="topbar__link" href="#statistik">
           Statistik
         </a>
+        <Link className="topbar__link" to="/auth">
+          Masuk
+        </Link>
         <Link className="btn btn-accent" to="/tracer-form">
           Isi Tracer Study
         </Link>

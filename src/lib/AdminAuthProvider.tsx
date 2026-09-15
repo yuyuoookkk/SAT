@@ -73,6 +73,12 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
+      signUp: async (email, password) => {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        // With email confirmation on, Supabase returns a user but no session.
+        return Boolean(data.session);
+      },
       signOut: async () => {
         await supabase.auth.signOut();
       },

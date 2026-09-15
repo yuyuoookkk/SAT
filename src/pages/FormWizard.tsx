@@ -8,6 +8,7 @@ import Step2Status from '../components/form/Step2Status';
 import Step3Evaluasi from '../components/form/Step3Evaluasi';
 import Step4Selesai from '../components/form/Step4Selesai';
 import { supabase } from '../lib/supabase';
+import { useAdminAuth } from '../lib/adminAuthContext';
 import type { FormData } from '../lib/tracerStudy';
 
 /** Copy for the blue band above the form — Figma node 3435:223. */
@@ -40,6 +41,9 @@ const STATUS_DB_VALUE: Record<string, string> = {
 };
 
 const FormWizard = () => {
+  // The questionnaire stays open to anonymous visitors; a session just means we
+  // can attribute the response and save them retyping their email.
+  const { session } = useAdminAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,6 +51,13 @@ const FormWizard = () => {
 
   const setField = (name: string, value: string | number) =>
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+  // Prefill the signed-in alumnus's email. Derived at render rather than
+  // written into state, so typing over it simply wins and there is no effect
+  // racing the first paint.
+  const sessionEmail = session?.user?.email;
+  const data: FormData =
+    sessionEmail && !formData.email ? { ...formData, email: sessionEmail } : formData;
 
   const goTo = (next: number) => {
     setStep(next);
@@ -63,19 +74,19 @@ const FormWizard = () => {
     // Trim on the way out: a trailing space in a NISN or an email is invisible
     // in the UI but makes the row impossible to match later.
     const str = (k: string) => {
-      const v = formData[k];
+      const v = data[k];
       if (typeof v !== 'string') return v ?? null;
       const t = v.trim();
       return t === '' ? null : t;
     };
-    const num = (k: string) => (formData[k] as number) ?? null;
+    const num = (k: string) => (data[k] as number) ?? null;
     const int = (k: string) => {
-      const v = formData[k];
+      const v = data[k];
       if (v === undefined || v === '') return null;
       const n = parseInt(String(v), 10);
       return Number.isNaN(n) ? null : n;
     };
-    const statusLabel = (formData.statusSaatIni as string) ?? '';
+    const statusLabel = (data.statusSaatIni as string) ?? '';
 
     // One Link & Match score, whichever section the chosen status showed.
     const kesesuaian =
@@ -96,6 +107,9 @@ const FormWizard = () => {
           no_telepon: str('noTelepon'),
           alamat: str('alamat'),
           status_saat_ini: STATUS_DB_VALUE[statusLabel] ?? statusLabel,
+          // Null for an anonymous visitor; the RLS policy added in migration
+          // 0005 only permits a user to file a response as themselves.
+          user_id: session?.user?.id ?? null,
 
           // karir & pekerjaan
           nama_perusahaan: str('namaPerusahaan'),
@@ -200,11 +214,11 @@ const FormWizard = () => {
           <div className="form-layout">
             <div className="form-panel">
               {step === 1 && (
-                <Step1Identitas formData={formData} setField={setField} nextStep={nextStep} />
+                <Step1Identitas formData={data} setField={setField} nextStep={nextStep} />
               )}
               {step === 2 && (
                 <Step2Status
-                  formData={formData}
+                  formData={data}
                   setField={setField}
                   nextStep={nextStep}
                   prevStep={prevStep}
@@ -212,7 +226,7 @@ const FormWizard = () => {
               )}
               {step === 3 && (
                 <Step3Evaluasi
-                  formData={formData}
+                  formData={data}
                   setField={setField}
                   prevStep={prevStep}
                   onSubmit={submitToSupabase}

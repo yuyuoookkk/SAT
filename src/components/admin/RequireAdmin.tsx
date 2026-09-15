@@ -19,7 +19,7 @@ const RequireAdmin = ({ children }: { children: ReactNode }) => {
   }
 
   if (!session) {
-    return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/auth?role=admin" state={{ from: location.pathname }} replace />;
   }
 
   // Signed in, but not on the allowlist: say so plainly instead of showing a
@@ -38,7 +38,7 @@ const RequireAdmin = ({ children }: { children: ReactNode }) => {
           type="button"
           className="admin-btn admin-btn--ghost"
           onClick={() => {
-            void signOut().then(() => navigate('/admin/login', { replace: true }));
+            void signOut().then(() => navigate('/auth?role=admin', { replace: true }));
           }}
         >
           Keluar

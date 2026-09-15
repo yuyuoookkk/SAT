@@ -11,6 +11,9 @@ export interface AdminAuth {
    */
   isAdmin: boolean | null;
   signIn: (email: string, password: string) => Promise<void>;
+  /** Resolves to true when the account is usable immediately, false when
+   *  Supabase is waiting on email confirmation. */
+  signUp: (email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
 }
 

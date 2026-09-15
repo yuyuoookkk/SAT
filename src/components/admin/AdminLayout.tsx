@@ -22,7 +22,7 @@ const AdminLayout = ({ children, search }: Props) => {
   const email = session?.user?.email ?? 'admin';
   const handleSignOut = async () => {
     await signOut();
-    navigate('/admin/login', { replace: true });
+    navigate('/auth?role=admin', { replace: true });
   };
 
   return (

@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import FormWizard from './pages/FormWizard';
-import Login from './pages/admin/Login';
+import AuthPage from './pages/AuthPage';
 import Overview from './pages/admin/Overview';
 import AkunSiswa from './pages/admin/AkunSiswa';
 import DataKuisioner from './pages/admin/DataKuisioner';
@@ -32,7 +32,14 @@ function App() {
           />
 
           {/* Admin */}
-          <Route path="/admin/login" element={<Login />} />
+          {/* Combined entry point: pick Admin or User, then log in or sign up. */}
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/masuk" element={<Navigate to="/auth" replace />} />
+          {/* Kept so existing links and bookmarks still work. */}
+          <Route
+            path="/admin/login"
+            element={<Navigate to="/auth?role=admin" replace />}
+          />
           <Route
             path="/admin"
             element={
