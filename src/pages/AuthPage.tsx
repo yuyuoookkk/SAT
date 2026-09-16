@@ -5,13 +5,18 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  Fingerprint,
+  GraduationCap,
   IdCard,
   Lock,
   Mail,
+  Phone,
   ShieldCheck,
   User,
+  Users,
 } from 'lucide-react';
 import { useAdminAuth } from '../lib/adminAuthContext';
+import { JENIS_KELAMIN, JURUSAN } from '../lib/tracerStudy';
 
 type Role = 'user' | 'admin';
 type Mode = 'login' | 'signup';
@@ -43,14 +48,25 @@ const AuthPage = () => {
   const role: Role = params.get('role') === 'admin' ? 'admin' : 'user';
   const [mode, setMode] = useState<Mode>(params.get('mode') === 'signup' ? 'signup' : 'login');
 
+  // Admin accounts are not self-service. Membership of the allowlist is what
+  // makes an admin (migration 0002), and a sign-up form that cannot grant it
+  // only teaches people to expect an account that never arrives. So the Daftar
+  // tab is not offered for this role, and a URL asking for it is ignored.
+  const signUpAllowed = role === 'user';
+  const effectiveMode: Mode = signUpAllowed ? mode : 'login';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   // Collected on sign-up only, and only for alumni: an admin approving a
   // request needs something to check it against, and an email address alone is
-  // not it. Both are passed to migration 0008 and matched to the roster.
+  // not it. These go to migrations 0008/0009 and are matched to the roster.
   const [fullName, setFullName] = useState('');
   const [nisn, setNisn] = useState('');
+  const [nik, setNik] = useState('');
+  const [jurusan, setJurusan] = useState('');
+  const [jenisKelamin, setJenisKelamin] = useState('');
+  const [noTelepon, setNoTelepon] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -78,28 +94,31 @@ const AuthPage = () => {
     setError(null);
     setNotice(null);
 
-    if (mode === 'signup' && password !== confirm) {
+    if (effectiveMode === 'signup' && password !== confirm) {
       setError('Konfirmasi kata sandi tidak cocok.');
       return;
     }
-    if (mode === 'signup' && password.length < 8) {
+    if (effectiveMode === 'signup' && password.length < 8) {
       setError('Kata sandi minimal 8 karakter.');
       return;
     }
 
     setBusy(true);
     try {
-      if (mode === 'login') {
+      if (effectiveMode === 'login') {
         await signIn(email, password);
         navigate(returnTo ?? COPY[role].after, { replace: true });
         return;
       }
 
-      const activeNow = await signUp(
-        email,
-        password,
-        role === 'user' ? { fullName, nisn } : undefined,
-      );
+      const activeNow = await signUp(email, password, {
+        fullName,
+        nisn,
+        nik,
+        jurusan,
+        jenisKelamin,
+        noTelepon,
+      });
 
       if (!activeNow) {
         setNotice(
@@ -131,7 +150,7 @@ const AuthPage = () => {
 
   return (
     <div className="auth">
-      <div className="auth__card">
+      <div className={`auth__card${effectiveMode === 'signup' ? ' auth__card--wide' : ''}`}>
         <button type="button" className="auth__back" onClick={() => navigate('/')}>
           <ArrowLeft size={15} />
           Kembali ke Beranda
@@ -174,23 +193,25 @@ const AuthPage = () => {
           </button>
         </div>
 
-        {/* Login / sign-up switch */}
-        <div className="auth__modes">
-          <button
-            type="button"
-            className={`auth__mode${mode === 'login' ? ' is-active' : ''}`}
-            onClick={() => switchMode('login')}
-          >
-            Masuk
-          </button>
-          <button
-            type="button"
-            className={`auth__mode${mode === 'signup' ? ' is-active' : ''}`}
-            onClick={() => switchMode('signup')}
-          >
-            Daftar
-          </button>
-        </div>
+        {/* Login / sign-up switch — admins log in only. */}
+        {signUpAllowed && (
+          <div className="auth__modes">
+            <button
+              type="button"
+              className={`auth__mode${effectiveMode === 'login' ? ' is-active' : ''}`}
+              onClick={() => switchMode('login')}
+            >
+              Masuk
+            </button>
+            <button
+              type="button"
+              className={`auth__mode${effectiveMode === 'signup' ? ' is-active' : ''}`}
+              onClick={() => switchMode('signup')}
+            >
+              Daftar
+            </button>
+          </div>
+        )}
 
         {error && (
           <p className="admin-error">
@@ -205,27 +226,27 @@ const AuthPage = () => {
           </p>
         )}
 
-        {role === 'admin' && mode === 'signup' && !notice && (
+        {role === 'admin' && !notice && (
           <p className="auth__hint">
-            Mendaftar tidak otomatis memberikan akses admin. Akun baru harus ditambahkan ke
-            daftar admin oleh admin yang sudah ada.
+            Akun admin tidak dapat didaftarkan sendiri. Untuk menambah admin baru, admin yang
+            sudah terdaftar harus memasukkan akunnya ke daftar admin.
           </p>
         )}
 
-        {role === 'user' && mode === 'signup' && !notice && (
+        {role === 'user' && effectiveMode === 'signup' && !notice && (
           <p className="auth__hint">
-            Pendaftaran diverifikasi terlebih dahulu. Isi nama dan NISN sesuai ijazah agar admin
-            sekolah dapat mencocokkannya dengan data induk alumni — kuisioner baru dapat diisi
-            setelah pendaftaran disetujui.
+            Isi data sesuai ijazah dan kartu identitas. Admin sekolah akan mencocokkannya
+            dengan data induk alumni — kuisioner baru dapat diisi setelah pendaftaran disetujui.
           </p>
         )}
 
         <form onSubmit={handleSubmit}>
-          {mode === 'signup' && role === 'user' && (
-            <>
-              <div className="field">
+          {effectiveMode === 'signup' && (
+            <div className="auth__grid">
+              <div className="field field--wide">
                 <label className="field__label" htmlFor="auth-name">
                   Nama Lengkap (Sesuai Ijazah)
+                  <span aria-hidden="true" className="field__req">*</span>
                 </label>
                 <div className="field__control">
                   <span className="field__icon" aria-hidden="true"><User size={18} /></span>
@@ -244,13 +265,17 @@ const AuthPage = () => {
               </div>
 
               <div className="field">
-                <label className="field__label" htmlFor="auth-nisn">NISN</label>
+                <label className="field__label" htmlFor="auth-nisn">
+                  NISN
+                  <span aria-hidden="true" className="field__req">*</span>
+                </label>
                 <div className="field__control">
                   <span className="field__icon" aria-hidden="true"><IdCard size={18} /></span>
                   <input
                     id="auth-nisn"
                     type="text"
                     inputMode="numeric"
+                    autoComplete="off"
                     className="form-control form-control--with-icon"
                     value={nisn}
                     onChange={(e) => setNisn(e.target.value.replace(/\D/g, '').slice(0, 10))}
@@ -260,15 +285,103 @@ const AuthPage = () => {
                     required
                   />
                 </div>
+                <span className="field__hint">Dicocokkan dengan data induk alumni.</span>
+              </div>
+
+              <div className="field">
+                <label className="field__label" htmlFor="auth-nik">
+                  NIK
+                  <span aria-hidden="true" className="field__req">*</span>
+                </label>
+                <div className="field__control">
+                  <span className="field__icon" aria-hidden="true"><Fingerprint size={18} /></span>
+                  <input
+                    id="auth-nik"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    className="form-control form-control--with-icon"
+                    value={nik}
+                    onChange={(e) => setNik(e.target.value.replace(/\D/g, '').slice(0, 16))}
+                    placeholder="16 digit sesuai KTP"
+                    minLength={16}
+                    maxLength={16}
+                    required
+                  />
+                </div>
+                <span className="field__hint">Tepat 16 digit angka.</span>
+              </div>
+
+              <div className="field">
+                <label className="field__label" htmlFor="auth-jurusan">
+                  Kompetensi Keahlian (Jurusan)
+                  <span aria-hidden="true" className="field__req">*</span>
+                </label>
+                <div className="field__control">
+                  <span className="field__icon" aria-hidden="true"><GraduationCap size={18} /></span>
+                  <select
+                    id="auth-jurusan"
+                    className="form-control form-control--with-icon"
+                    value={jurusan}
+                    onChange={(e) => setJurusan(e.target.value)}
+                    required
+                  >
+                    <option value="">Pilih Jurusan</option>
+                    {JURUSAN.map((j) => <option key={j} value={j}>{j}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="field__label" htmlFor="auth-jk">
+                  Jenis Kelamin
+                  <span aria-hidden="true" className="field__req">*</span>
+                </label>
+                <div className="field__control">
+                  <span className="field__icon" aria-hidden="true"><Users size={18} /></span>
+                  <select
+                    id="auth-jk"
+                    className="form-control form-control--with-icon"
+                    value={jenisKelamin}
+                    onChange={(e) => setJenisKelamin(e.target.value)}
+                    required
+                  >
+                    <option value="">Pilih Jenis Kelamin</option>
+                    {JENIS_KELAMIN.map((g) => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="field field--wide">
+                <label className="field__label" htmlFor="auth-hp">
+                  Nomor WhatsApp Aktif
+                  <span aria-hidden="true" className="field__req">*</span>
+                </label>
+                <div className="field__control">
+                  <span className="field__icon" aria-hidden="true"><Phone size={18} /></span>
+                  <input
+                    id="auth-hp"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
+                    className="form-control form-control--with-icon"
+                    value={noTelepon}
+                    onChange={(e) => setNoTelepon(e.target.value.replace(/\D/g, '').slice(0, 15))}
+                    placeholder="0812xxxxxxx"
+                    minLength={9}
+                    maxLength={15}
+                    required
+                  />
+                </div>
                 <span className="field__hint">
-                  Dicocokkan dengan data induk alumni saat admin memverifikasi.
+                  Dipakai sekolah untuk menghubungi Anda bila data perlu dikonfirmasi.
                 </span>
               </div>
-            </>
+            </div>
           )}
 
-          <div className="field">
-            <label className="field__label" htmlFor="auth-email">Email</label>
+          <div className="field field--wide">
+            <label className="field__label" htmlFor="auth-email">Email Aktif</label>
             <div className="field__control">
               <span className="field__icon" aria-hidden="true"><Mail size={18} /></span>
               <input
@@ -291,20 +404,20 @@ const AuthPage = () => {
               <input
                 id="auth-password"
                 type="password"
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                autoComplete={effectiveMode === 'login' ? 'current-password' : 'new-password'}
                 className="form-control form-control--with-icon"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                minLength={mode === 'signup' ? 8 : undefined}
+                minLength={effectiveMode === 'signup' ? 8 : undefined}
                 required
               />
             </div>
-            {mode === 'signup' && (
+            {effectiveMode === 'signup' && (
               <span className="field__hint">Minimal 8 karakter.</span>
             )}
           </div>
 
-          {mode === 'signup' && (
+          {effectiveMode === 'signup' && (
             <div className="field">
               <label className="field__label" htmlFor="auth-confirm">Ulangi Kata Sandi</label>
               <div className="field__control">
@@ -325,13 +438,13 @@ const AuthPage = () => {
           <button type="submit" className="btn btn-primary auth__submit" disabled={busy}>
             {busy
               ? 'Memproses…'
-              : mode === 'login'
+              : effectiveMode === 'login'
                 ? `Masuk sebagai ${COPY[role].title}`
                 : `Daftar sebagai ${COPY[role].title}`}
           </button>
         </form>
 
-        {role === 'user' && mode === 'login' && (
+        {role === 'user' && effectiveMode === 'login' && (
           <p className="auth__alt">
             Belum punya akun?{' '}
             <button type="button" className="auth__link" onClick={() => switchMode('signup')}>

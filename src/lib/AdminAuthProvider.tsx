@@ -116,6 +116,10 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
             data: {
               full_name: details?.fullName ?? '',
               nisn: details?.nisn ?? '',
+              nik: details?.nik ?? '',
+              jurusan: details?.jurusan ?? '',
+              jenis_kelamin: details?.jenisKelamin ?? '',
+              no_telepon: details?.noTelepon ?? '',
             },
           },
         });
@@ -132,6 +136,10 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
           const { error: rpcError } = await supabase.rpc('request_account_approval', {
             p_full_name: details?.fullName ?? null,
             p_nisn: details?.nisn ?? null,
+            p_nik: details?.nik ?? null,
+            p_jurusan: details?.jurusan ?? null,
+            p_jenis_kelamin: details?.jenisKelamin ?? null,
+            p_no_telepon: details?.noTelepon ?? null,
           });
           // A missing function means 0008 is not applied; that is the admin's
           // problem to fix, not a reason to fail a sign-up that succeeded.

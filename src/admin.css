@@ -852,10 +852,10 @@
   font-weight: 600;
 }
 
+/* Inline rather than flex: as a flex row the name took the full width and
+   shoved the L/P badge to the far edge whenever it wrapped to a second line. */
 .cell-name {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   font-family: var(--font-brand);
   font-size: 14px;
   font-weight: 600;
@@ -870,8 +870,10 @@
   color: var(--brand-700);
   font-size: 10px;
   font-weight: 700;
-  display: grid;
+  display: inline-grid;
   place-items: center;
+  vertical-align: text-bottom;
+  margin-left: 6px;
 }
 
 .cell-strong {
@@ -1754,4 +1756,45 @@
 .admin-foot-note svg {
   flex-shrink: 0;
   margin-top: 3px;
+}
+
+/* Sign-up needs nine fields; one 460px column of them is a scroll, not a form.
+   The card widens and the form becomes two columns, with `display: contents`
+   letting the sign-up-only fields take part directly. */
+.auth__card--wide {
+  max-width: 720px;
+}
+
+.auth__grid {
+  display: contents;
+}
+
+@media (min-width: 620px) {
+  .auth__card--wide form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+    align-items: start;
+  }
+
+  .auth__card--wide form > .field--wide,
+  .auth__card--wide form > .auth__submit {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Six columns squeeze the name cell hard enough that the L/P badge wraps onto
+   a line of its own. Measured: a full Balinese name at 14px semibold runs to
+   ~156px, plus the 32px avatar, the 12px gap, the badge and the cell padding. */
+.admin-table--approvals th:first-child,
+.admin-table--approvals td:first-child {
+  min-width: 290px;
+}
+
+/* The text beside the avatar is shrink-to-fit by default, so it ends exactly at
+   the name and leaves the badge nowhere to go but the next line. Let it take
+   the cell's width instead. */
+.cell-identity > span:last-child {
+  flex: 1;
+  min-width: 0;
 }

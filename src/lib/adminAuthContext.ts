@@ -4,11 +4,20 @@ import type { Session } from '@supabase/supabase-js';
 /** Where a sign-up stands with the school — migration 0008. */
 export type Approval = 'pending' | 'approved' | 'rejected';
 
+/**
+ * The identity an alumnus gives when signing up — the same fields the school
+ * already holds for its alumni, so an admin can compare the two rather than
+ * decide on an email address.
+ */
 export interface SignUpDetails {
-  /** Shown to the admin deciding on the request. */
   fullName?: string;
   /** Matched against the alumni roster, so the admin has something to check. */
   nisn?: string;
+  nik?: string;
+  jurusan?: string;
+  jenisKelamin?: string;
+  /** WhatsApp number. */
+  noTelepon?: string;
 }
 
 export interface AdminAuth {

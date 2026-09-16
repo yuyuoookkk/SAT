@@ -351,12 +351,18 @@ export interface AccountRequestRow {
   email: string | null;
   full_name: string | null;
   nisn: string | null;
+  nik: string | null;
+  jenis_kelamin: string | null;
+  no_telepon: string | null;
+  /** The jurusan the applicant typed — not necessarily the roster's. */
+  jurusan_pendaftar: string | null;
   status: ApprovalStatus;
   note: string | null;
   requested_at: string;
   decided_at: string | null;
   /** Whether the NISN given at sign-up is one the alumni roster actually holds. */
   cocok_roster: boolean;
+  /** What the ROSTER says — this is what the match verdict is about. */
   jurusan: string | null;
   angkatan: number | null;
   sudah_mengisi: boolean;
@@ -392,7 +398,9 @@ export async function fetchAccountRequests(
   if (status) q = q.eq('status', status);
   if (search.trim()) {
     const term = `%${search.trim()}%`;
-    q = q.or(`email.ilike.${term},full_name.ilike.${term},nisn.ilike.${term}`);
+    q = q.or(
+      `email.ilike.${term},full_name.ilike.${term},nisn.ilike.${term},nik.ilike.${term}`,
+    );
   }
 
   const { data, error, count } = await q;

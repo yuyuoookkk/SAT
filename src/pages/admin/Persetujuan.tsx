@@ -112,7 +112,7 @@ const Persetujuan = () => {
             <input
               type="search"
               value={search}
-              placeholder="Cari nama, email atau NISN…"
+              placeholder="Cari nama, email, NISN atau NIK…"
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
@@ -141,11 +141,12 @@ const Persetujuan = () => {
         </div>
 
         <div className="admin-tablewrap">
-          <table className="admin-table">
+          <table className="admin-table admin-table--approvals">
             <thead>
               <tr>
                 <th scope="col">Pendaftar</th>
-                <th scope="col">NISN &amp; Data Induk</th>
+                <th scope="col">NISN, NIK &amp; Data Induk</th>
+                <th scope="col">Jurusan &amp; Kontak</th>
                 <th scope="col">Waktu Daftar</th>
                 <th scope="col">Status</th>
                 <th scope="col"><span className="sr-only">Keputusan</span></th>
@@ -153,10 +154,10 @@ const Persetujuan = () => {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={5} className="admin-table__empty">Memuat pendaftaran…</td></tr>
+                <tr><td colSpan={6} className="admin-table__empty">Memuat pendaftaran…</td></tr>
               )}
               {!loading && rows.length === 0 && (
-                <tr><td colSpan={5} className="admin-table__empty">
+                <tr><td colSpan={6} className="admin-table__empty">
                   {status === 'pending'
                     ? 'Tidak ada pendaftaran yang menunggu persetujuan.'
                     : 'Tidak ada pendaftaran yang cocok dengan filter ini.'}
@@ -174,13 +175,23 @@ const Persetujuan = () => {
                         {initials(nameOf(row))}
                       </span>
                       <span>
-                        <span className="cell-name">{nameOf(row)}</span>
+                        <span className="cell-name">
+                          {nameOf(row)}
+                          {row.jenis_kelamin && (
+                            <span
+                              className={`cell-badge cell-badge--${row.jenis_kelamin === 'Perempuan' ? 'p' : 'l'}`}
+                            >
+                              {row.jenis_kelamin === 'Perempuan' ? 'P' : 'L'}
+                            </span>
+                          )}
+                        </span>
                         <span className="cell-sub">{row.email ?? '—'}</span>
                       </span>
                     </div>
                   </td>
                   <td>
-                    <span className="cell-strong">{row.nisn ?? 'Tidak diisi'}</span>
+                    <span className="cell-strong">NISN {row.nisn ?? 'tidak diisi'}</span>
+                    <span className="cell-sub">NIK {row.nik ?? 'tidak diisi'}</span>
                     {row.cocok_roster ? (
                       <span className="cell-match cell-match--ok">
                         <BadgeCheck size={14} />
@@ -193,6 +204,21 @@ const Persetujuan = () => {
                         Tidak ada di data induk
                       </span>
                     )}
+                  </td>
+                  <td>
+                    <span className="cell-strong">{row.jurusan_pendaftar ?? '—'}</span>
+                    {/* Flagged rather than reconciled: the roster is the record,
+                        and a mismatch is exactly what the admin should see. */}
+                    {row.cocok_roster
+                      && row.jurusan
+                      && row.jurusan_pendaftar
+                      && row.jurusan !== row.jurusan_pendaftar && (
+                      <span className="cell-match cell-match--warn">
+                        <ShieldAlert size={14} />
+                        Berbeda dari data induk
+                      </span>
+                    )}
+                    <span className="cell-sub">{row.no_telepon ?? 'Tanpa nomor WhatsApp'}</span>
                   </td>
                   <td>
                     <span className="cell-strong">{formatDate(row.requested_at)}</span>
