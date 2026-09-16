@@ -1,8 +1,14 @@
 import type React from 'react';
 import { ArrowRight, CalendarDays, GraduationCap, Info, Mail, MapPin, Phone, User, Users } from 'lucide-react';
-import { ChoiceGroup, SelectField, TextField, TextareaField } from './fields';
+import { ChoiceGroup, SelectField, TextField, TextareaField, YearField } from './fields';
 import type { FormData } from '../../lib/tracerStudy';
-import { JENIS_KELAMIN, JURUSAN, STATUS_KEGIATAN, TAHUN_LULUS } from '../../lib/tracerStudy';
+import {
+  JENIS_KELAMIN,
+  JURUSAN,
+  STATUS_KEGIATAN,
+  TAHUN_LULUS_MAX,
+  TAHUN_LULUS_MIN,
+} from '../../lib/tracerStudy';
 
 interface Props {
   formData: FormData;
@@ -59,12 +65,13 @@ const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
           required
         />
 
-        <SelectField
+        <YearField
           label="Tahun Lulus"
           name="tahunLulus"
           icon={CalendarDays}
           placeholder="Pilih Tahun Lulus"
-          options={TAHUN_LULUS}
+          min={TAHUN_LULUS_MIN}
+          max={TAHUN_LULUS_MAX}
           value={str('tahunLulus')}
           onChange={setField}
           required

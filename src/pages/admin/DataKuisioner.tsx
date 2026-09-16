@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
+  FileSpreadsheet,
   GraduationCap,
   Pencil,
   RotateCcw,
@@ -20,6 +21,7 @@ import {
   fetchResponses,
 } from '../../lib/adminData';
 import type { DashboardStats, ResponseRow } from '../../lib/adminData';
+import { downloadAllResponses } from '../../lib/exportResponses';
 import { avatarTint, formatDate, formatNumber, formatPercent, formatTimeWita, initials } from '../../lib/format';
 import { JURUSAN } from '../../lib/tracerStudy';
 
@@ -53,6 +55,8 @@ const DataKuisioner = () => {
   const [years, setYears] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [exporting, setExporting] = useState<string | null>(null);
 
   const setSearch = (v: string) => { setSearchValue(v); setPage(1); };
   const setJurusan = (v: string) => { setJurusanValue(v); setPage(1); };
@@ -85,6 +89,31 @@ const DataKuisioner = () => {
     fetchDashboard(null).then(setStats).catch(() => setStats(null));
   }, []);
 
+  /**
+   * Downloads every questionnaire response, not just the page on screen and not
+   * just the rows the current filters allow — the same export the Detail Data
+   * page offers, placed here because this is the page admins reach for first.
+   */
+  const exportAll = async () => {
+    setError(null);
+    setNotice(null);
+    setExporting('Menyiapkan…');
+    try {
+      const count = await downloadAllResponses((loaded, all) => {
+        setExporting(`Mengambil ${formatNumber(loaded)} / ${formatNumber(all)}…`);
+      });
+      setNotice(
+        count === 0
+          ? 'Belum ada alumni yang mengisi kuisioner, jadi tidak ada data untuk diunduh.'
+          : `${formatNumber(count)} data hasil kuisioner berhasil diunduh.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Gagal mengunduh data kuisioner.');
+    } finally {
+      setExporting(null);
+    }
+  };
+
   const reset = () => {
     setSearchValue(''); setJurusanValue(''); setAngkatanValue('');
     setStatusValue(''); setValidasiValue(''); setPage(1);
@@ -104,9 +133,22 @@ const DataKuisioner = () => {
             kuesioner Tracer Study SMK TI Bali Global Jimbaran.
           </p>
         </div>
+        <div className="admin-head__actions">
+          <button
+            type="button"
+            className="admin-btn admin-btn--soft"
+            onClick={() => void exportAll()}
+            disabled={exporting !== null}
+            title="Unduh seluruh hasil kuisioner sebagai file Excel"
+          >
+            <FileSpreadsheet size={16} />
+            {exporting ?? 'Export Excel'}
+          </button>
+        </div>
       </div>
 
       {error && <p className="admin-error">{error}</p>}
+      {notice && <p className="admin-notice">{notice}</p>}
 
       {/* Four summary cards */}
       <section className="kpi-grid">

@@ -1,4 +1,6 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentType, ReactNode } from 'react';
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 
 /* Shared form primitives matching the Figma input specs:
    fill #f3f4f5, border #c2c6d6, radius 8, height 48, 20px leading icon. */
@@ -96,6 +98,173 @@ export const TextField = ({
           {hint}
         </span>
       )}
+    </div>
+  );
+};
+
+interface YearFieldProps extends BaseProps {
+  value: string;
+  onChange: (name: string, value: string) => void;
+  placeholder?: string;
+  /** Oldest selectable year. */
+  min: number;
+  /** Newest selectable year. */
+  max: number;
+}
+
+const YEARS_PER_PAGE = 12;
+
+/**
+ * A year-only date picker.
+ *
+ * The browser has no `<input type="year">`, and `type="date"` would demand a
+ * day and a month the alumnus does not have to hand. So this is a normal text
+ * input — typeable, and still covered by native `required` validation — with a
+ * calendar popover that pages through years twelve at a time.
+ */
+export const YearField = ({
+  label,
+  name,
+  icon: Icon = CalendarDays,
+  wide,
+  required,
+  value,
+  onChange,
+  placeholder,
+  min,
+  max,
+}: YearFieldProps) => {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+
+  // Newest first: a recent graduate should not have to page back to find their
+  // year.
+  const years = useMemo(() => {
+    const out: number[] = [];
+    for (let y = max; y >= min; y -= 1) out.push(y);
+    return out;
+  }, [min, max]);
+
+  const pageCount = Math.max(1, Math.ceil(years.length / YEARS_PER_PAGE));
+  const pageOf = (year: number) => {
+    const i = years.indexOf(year);
+    return i < 0 ? 0 : Math.floor(i / YEARS_PER_PAGE);
+  };
+
+  const selected = /^\d{4}$/.test(value) ? Number(value) : undefined;
+  const [page, setPage] = useState(() => (selected ? pageOf(selected) : 0));
+  const shown = years.slice(page * YEARS_PER_PAGE, page * YEARS_PER_PAGE + YEARS_PER_PAGE);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  const toggle = () => {
+    // Reopen on the page holding the current answer, not wherever the user last
+    // browsed to.
+    if (!open && selected) setPage(pageOf(selected));
+    setOpen((v) => !v);
+  };
+
+  const outOfRange = selected !== undefined && (selected < min || selected > max);
+  const hintId = `${name}-hint`;
+
+  return (
+    <div className={`field${wide ? ' field--wide' : ''}`}>
+      <label className="field__label" htmlFor={name}>
+        {label}
+        {required && <span aria-hidden="true" className="field__req">*</span>}
+      </label>
+      <div className="field__control" ref={wrap}>
+        <span className="field__icon" aria-hidden="true">
+          <Icon size={20} />
+        </span>
+        <input
+          id={name}
+          name={name}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          className="form-control form-control--with-icon form-control--with-trailing"
+          placeholder={placeholder}
+          value={value}
+          required={required}
+          pattern="\d{4}"
+          aria-invalid={outOfRange || undefined}
+          aria-describedby={hintId}
+          onChange={(e) => onChange(name, e.target.value.replace(/\D/g, '').slice(0, 4))}
+          onFocus={() => setOpen(true)}
+        />
+        <button
+          type="button"
+          className="field__trailing"
+          onClick={toggle}
+          aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-label={`Pilih ${label.toLowerCase()}`}
+        >
+          <CalendarDays size={18} />
+        </button>
+
+        {open && (
+          <div className="yearpicker" role="dialog" aria-label={label}>
+            <div className="yearpicker__head">
+              <button
+                type="button"
+                className="yearpicker__nav"
+                onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                disabled={page >= pageCount - 1}
+                aria-label="Tahun lebih lama"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="yearpicker__range">
+                {shown.length ? `${shown[shown.length - 1]} – ${shown[0]}` : ''}
+              </span>
+              <button
+                type="button"
+                className="yearpicker__nav"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                aria-label="Tahun lebih baru"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <div className="yearpicker__grid">
+              {shown.map((y) => (
+                <button
+                  key={y}
+                  type="button"
+                  className={`yearpicker__year${selected === y ? ' is-on' : ''}`}
+                  aria-pressed={selected === y}
+                  onClick={() => {
+                    onChange(name, String(y));
+                    setOpen(false);
+                  }}
+                >
+                  {y}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+      <span id={hintId} className={`field__hint${outOfRange ? ' is-error' : ''}`}>
+        {outOfRange ? `Pilih tahun antara ${min} dan ${max}.` : `Tahun ${min}–${max}.`}
+      </span>
     </div>
   );
 };

@@ -41,8 +41,8 @@ const STATUS_DB_VALUE: Record<string, string> = {
 };
 
 const FormWizard = () => {
-  // The questionnaire stays open to anonymous visitors; a session just means we
-  // can attribute the response and save them retyping their email.
+  // Reaching this page means a session exists (RequireAuth, plus migration 0007
+  // at the database end). It attributes the response and prefills the email.
   const { session } = useAdminAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({});
@@ -52,12 +52,19 @@ const FormWizard = () => {
   const setField = (name: string, value: string | number) =>
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-  // Prefill the signed-in alumnus's email. Derived at render rather than
-  // written into state, so typing over it simply wins and there is no effect
-  // racing the first paint.
+  // Prefill the signed-in alumnus's email, as a convenience only. Derived at
+  // render rather than written into state, so typing over it simply wins and no
+  // effect races the first paint.
+  //
+  // The test is `=== undefined`, not falsiness: `setField` writes '' when the
+  // field is cleared, and treating that as "not filled in yet" made the account
+  // email snap straight back, so an alumnus signed in on a shared or school
+  // account could never enter their own address.
   const sessionEmail = session?.user?.email;
   const data: FormData =
-    sessionEmail && !formData.email ? { ...formData, email: sessionEmail } : formData;
+    sessionEmail && formData.email === undefined
+      ? { ...formData, email: sessionEmail }
+      : formData;
 
   const goTo = (next: number) => {
     setStep(next);

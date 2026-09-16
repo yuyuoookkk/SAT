@@ -23,7 +23,10 @@ export const JURUSAN = [
 ] as const;
 
 const CURRENT_YEAR = new Date().getFullYear();
-export const TAHUN_LULUS = Array.from({ length: 16 }, (_, i) => String(CURRENT_YEAR - i));
+
+/** Bounds for the graduation-year picker: this year back sixteen cohorts. */
+export const TAHUN_LULUS_MAX = CURRENT_YEAR;
+export const TAHUN_LULUS_MIN = CURRENT_YEAR - 15;
 
 /** Step 1 radio group — Figma nodes 3435:322 … 3440:22. */
 export const STATUS_KEGIATAN = [

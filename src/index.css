@@ -1837,3 +1837,130 @@ textarea.form-control {
   .form-panel > form, .form-panel > .done { padding: 24px 20px 28px; }
   .sitefoot__grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 }
+
+/* ------------------------------------------------------------------ *
+   Year picker (Tahun Lulus)
+   A calendar popover restricted to years — the browser has no native
+   year-only input, and a full date would ask for a day nobody remembers.
+ * ------------------------------------------------------------------ */
+
+.form-control--with-trailing {
+  padding-right: 48px;
+}
+
+.field__trailing {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-500);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.field__trailing:hover {
+  background-color: var(--brand-050);
+  color: var(--brand-700);
+}
+
+.field__trailing:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
+.yearpicker {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(320px, 100%);
+  padding: 12px;
+  background-color: var(--surface);
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.yearpicker__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.yearpicker__range {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.yearpicker__nav {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  color: var(--ink-600);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.yearpicker__nav:hover:not(:disabled) {
+  background-color: var(--surface-sunken);
+  border-color: var(--line-300);
+}
+
+.yearpicker__nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.yearpicker__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.yearpicker__year {
+  padding: 10px 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-sunken);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-600);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.yearpicker__year:hover {
+  background-color: var(--brand-050);
+  border-color: var(--brand-100);
+  color: var(--brand-700);
+}
+
+.yearpicker__year.is-on {
+  background-color: var(--brand-700);
+  border-color: var(--brand-700);
+  color: #ffffff;
+}
+
+.yearpicker__year:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
