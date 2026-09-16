@@ -1682,3 +1682,76 @@
 .matchrow { grid-template-columns: auto minmax(120px, 1fr); gap: 16px; }
 .matchbars dt { flex-direction: column; align-items: flex-start; gap: 2px; }
 .matchbars > div { padding: 8px 10px; }
+
+/* ------------------------------------------------------------------ *
+   Account approval (Persetujuan) — migration 0008
+ * ------------------------------------------------------------------ */
+
+/* Count of sign-ups waiting on a decision, in the sidebar. */
+.admin-nav__badge {
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background-color: #b3261e;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.admin-nav__item.is-active .admin-nav__badge {
+  background-color: #fff;
+  color: #b3261e;
+}
+
+.admin-btn--sm {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+.admin-btn--danger.admin-btn--ghost {
+  color: #b3261e;
+}
+
+.admin-btn--danger.admin-btn--ghost:hover {
+  background-color: #fceceb;
+  color: #8c1d18;
+}
+
+.admin-btn:disabled {
+  opacity: 0.55;
+}
+
+/* Whether the NISN given at sign-up is one the roster actually holds. */
+.cell-match {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.cell-match--ok   { color: #15803d; }
+.cell-match--warn { color: #b45309; }
+
+.admin-foot-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--admin-ink-mute);
+}
+
+.admin-foot-note svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}

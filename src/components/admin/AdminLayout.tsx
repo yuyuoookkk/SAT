@@ -1,12 +1,15 @@
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Bell, ClipboardList, LayoutGrid, LogOut, Search, Users } from 'lucide-react';
+import { Bell, ClipboardList, LayoutGrid, LogOut, Search, UserCheck, Users } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthContext';
+import { countPendingRequests } from '../../lib/adminData';
 
 const NAV = [
   { to: '/admin', label: 'Overview', icon: LayoutGrid, end: true },
   { to: '/admin/akun-siswa', label: 'Akun Siswa', icon: Users, end: false },
   { to: '/admin/data-kuisioner', label: 'Data Kuisioner', icon: ClipboardList, end: false },
+  { to: '/admin/persetujuan', label: 'Persetujuan', icon: UserCheck, end: false },
 ];
 
 interface Props {
@@ -18,6 +21,18 @@ interface Props {
 const AdminLayout = ({ children, search }: Props) => {
   const { session, signOut } = useAdminAuth();
   const navigate = useNavigate();
+
+  // Sign-ups waiting on a decision. Shown as a badge because an approval queue
+  // nobody looks at is the same as no approval at all. A failed count (0008 not
+  // applied) simply shows no badge.
+  const [pending, setPending] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    countPendingRequests()
+      .then((n) => { if (alive) setPending(n); })
+      .catch(() => { if (alive) setPending(0); });
+    return () => { alive = false; };
+  }, []);
 
   const email = session?.user?.email ?? 'admin';
   const handleSignOut = async () => {
@@ -38,6 +53,11 @@ const AdminLayout = ({ children, search }: Props) => {
             >
               <Icon size={18} />
               {label}
+              {to === '/admin/persetujuan' && pending > 0 && (
+                <span className="admin-nav__badge" aria-label={`${pending} menunggu persetujuan`}>
+                  {pending}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>

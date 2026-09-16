@@ -5,8 +5,10 @@ import AuthPage from './pages/AuthPage';
 import Overview from './pages/admin/Overview';
 import AkunSiswa from './pages/admin/AkunSiswa';
 import DataKuisioner from './pages/admin/DataKuisioner';
+import Persetujuan from './pages/admin/Persetujuan';
 import RequireAdmin from './components/admin/RequireAdmin';
 import RequireAuth from './components/RequireAuth';
+import RequireApproval from './components/RequireApproval';
 import { AdminAuthProvider } from './lib/AdminAuthProvider';
 
 function App() {
@@ -27,9 +29,11 @@ function App() {
             path="/tracer-form"
             element={
               <RequireAuth>
-                <div className="app-container">
-                  <FormWizard />
-                </div>
+                <RequireApproval>
+                  <div className="app-container">
+                    <FormWizard />
+                  </div>
+                </RequireApproval>
               </RequireAuth>
             }
           />
@@ -64,6 +68,14 @@ function App() {
             element={
               <RequireAdmin>
                 <DataKuisioner />
+              </RequireAdmin>
+            }
+          />
+          <Route
+            path="/admin/persetujuan"
+            element={
+              <RequireAdmin>
+                <Persetujuan />
               </RequireAdmin>
             }
           />

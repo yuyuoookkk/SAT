@@ -339,3 +339,93 @@ export async function fetchAllResponses(
 
   return all;
 }
+
+/* =============================================================================
+   Account approval — supabase/migrations/0008_account_approval.sql
+   ========================================================================== */
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface AccountRequestRow {
+  user_id: string;
+  email: string | null;
+  full_name: string | null;
+  nisn: string | null;
+  status: ApprovalStatus;
+  note: string | null;
+  requested_at: string;
+  decided_at: string | null;
+  /** Whether the NISN given at sign-up is one the alumni roster actually holds. */
+  cocok_roster: boolean;
+  jurusan: string | null;
+  angkatan: number | null;
+  sudah_mengisi: boolean;
+}
+
+export const APPROVAL_LABEL: Record<ApprovalStatus, string> = {
+  pending: 'Menunggu',
+  approved: 'Disetujui',
+  rejected: 'Ditolak',
+};
+
+export interface AccountRequestFilters {
+  search?: string;
+  status?: ApprovalStatus | '';
+  page?: number;
+  pageSize?: number;
+}
+
+export async function fetchAccountRequests(
+  f: AccountRequestFilters = {},
+): Promise<Page<AccountRequestRow>> {
+  const { search = '', status = '', page = 1, pageSize = 8 } = f;
+  const from = (page - 1) * pageSize;
+
+  let q = supabase
+    .from('admin_account_requests')
+    .select('*', { count: 'exact' })
+    // Pending first, then most recent — the queue is the point of the screen.
+    .order('urutan', { ascending: true })
+    .order('requested_at', { ascending: false })
+    .range(from, from + pageSize - 1);
+
+  if (status) q = q.eq('status', status);
+  if (search.trim()) {
+    const term = `%${search.trim()}%`;
+    q = q.or(`email.ilike.${term},full_name.ilike.${term},nisn.ilike.${term}`);
+  }
+
+  const { data, error, count } = await q;
+  if (error) throw error;
+  return { rows: (data ?? []) as AccountRequestRow[], total: count ?? 0 };
+}
+
+/** How many sign-ups are waiting — for the sidebar badge. */
+export async function countPendingRequests(): Promise<number> {
+  const { count, error } = await supabase
+    .from('admin_account_requests')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('status', 'pending');
+  if (error) throw error;
+  return count ?? 0;
+}
+
+/**
+ * Approve or reject a sign-up.
+ *
+ * Only `status` and `note` are sent: who decided and when are stamped by a
+ * trigger in migration 0008, so the audit trail cannot be forged from here.
+ */
+export async function decideAccountRequest(
+  userId: string,
+  status: ApprovalStatus,
+  note?: string | null,
+): Promise<void> {
+  const patch: { status: ApprovalStatus; note?: string | null } = { status };
+  if (note !== undefined) patch.note = note;
+  const { error } = await supabase
+    .from('account_requests')
+    .update(patch)
+    .eq('user_id', userId);
+  if (error) throw error;
+}

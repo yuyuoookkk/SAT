@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { AdminAuthContext } from './adminAuthContext';
-import type { AdminAuth } from './adminAuthContext';
+import type { AdminAuth, Approval } from './adminAuthContext';
 
 /**
  * Admin session.
@@ -19,6 +19,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   // Stored against the user id it was resolved for, so a previous account's
   // answer can never be read as the current one during a sign-out/sign-in.
   const [adminCheck, setAdminCheck] = useState<{ uid: string; ok: boolean } | null>(null);
+  // Same keying, same reason: an approval answered for the previous account
+  // must never be read as this one's.
+  const [approvalCheck, setApprovalCheck] = useState<{ uid: string; value: Approval } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -62,28 +65,90 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   }, [session]);
 
   const uid = session?.user?.id;
+
+  /**
+   * Ask the database whether this account has been approved (migration 0008).
+   *
+   * Like the admin check above, this is for messaging rather than security: the
+   * INSERT policy on `tracer_study` is the real boundary. So a call that fails
+   * — most likely because 0008 has not been applied yet — leaves the answer
+   * null, and the UI treats that as "carry on" rather than locking out an
+   * alumnus the database would happily accept.
+   */
+  const readApproval = useCallback(async (forUid: string) => {
+    const { data, error } = await supabase.rpc('my_account_status');
+    if (error) return;
+    const value = data as string;
+    if (value === 'pending' || value === 'approved' || value === 'rejected') {
+      setApprovalCheck({ uid: forUid, value });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!uid) return;
+    void readApproval(uid);
+  }, [uid, readApproval]);
+
   const isAdmin = uid && adminCheck?.uid === uid ? adminCheck.ok : null;
+  const approval = uid && approvalCheck?.uid === uid ? approvalCheck.value : null;
 
   const value = useMemo<AdminAuth>(
     () => ({
       session,
       loading,
       isAdmin,
+      approval,
+      refreshApproval: async () => {
+        if (uid) await readApproval(uid);
+      },
       signIn: async (email, password) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
-      signUp: async (email, password) => {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+      signUp: async (email, password, details) => {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          // Read by the auth.users trigger in migration 0008, so the request is
+          // opened with the details an admin needs even when the browser never
+          // gets as far as the RPC below.
+          options: {
+            data: {
+              full_name: details?.fullName ?? '',
+              nisn: details?.nisn ?? '',
+            },
+          },
+        });
         if (error) throw error;
+
         // With email confirmation on, Supabase returns a user but no session.
-        return Boolean(data.session);
+        const activeNow = Boolean(data.session);
+
+        // Belt and braces: on a managed instance the auth.users trigger may not
+        // have been creatable, so open the request from here too. Both sides
+        // are idempotent, and this one can only ever write a pending row for
+        // the calling account.
+        if (activeNow) {
+          const { error: rpcError } = await supabase.rpc('request_account_approval', {
+            p_full_name: details?.fullName ?? null,
+            p_nisn: details?.nisn ?? null,
+          });
+          // A missing function means 0008 is not applied; that is the admin's
+          // problem to fix, not a reason to fail a sign-up that succeeded.
+          if (!rpcError && data.session?.user?.id) {
+            await readApproval(data.session.user.id);
+          }
+        }
+
+        return activeNow;
       },
       signOut: async () => {
+        setApprovalCheck(null);
+        setAdminCheck(null);
         await supabase.auth.signOut();
       },
     }),
-    [session, loading, isAdmin],
+    [session, loading, isAdmin, approval, uid, readApproval],
   );
 
   return <AdminAuthContext.Provider value={value}>{children}</AdminAuthContext.Provider>;

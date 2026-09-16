@@ -1,7 +1,16 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, CheckCircle2, Lock, Mail, ShieldCheck, User } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  IdCard,
+  Lock,
+  Mail,
+  ShieldCheck,
+  User,
+} from 'lucide-react';
 import { useAdminAuth } from '../lib/adminAuthContext';
 
 type Role = 'user' | 'admin';
@@ -37,6 +46,11 @@ const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  // Collected on sign-up only, and only for alumni: an admin approving a
+  // request needs something to check it against, and an email address alone is
+  // not it. Both are passed to migration 0008 and matched to the roster.
+  const [fullName, setFullName] = useState('');
+  const [nisn, setNisn] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -81,11 +95,16 @@ const AuthPage = () => {
         return;
       }
 
-      const activeNow = await signUp(email, password);
+      const activeNow = await signUp(
+        email,
+        password,
+        role === 'user' ? { fullName, nisn } : undefined,
+      );
 
       if (!activeNow) {
         setNotice(
-          'Akun dibuat. Silakan cek email Anda untuk tautan konfirmasi sebelum masuk.',
+          'Akun dibuat. Silakan cek email Anda untuk tautan konfirmasi, lalu masuk. ' +
+            'Setelah itu admin sekolah akan memverifikasi pendaftaran Anda.',
         );
         return;
       }
@@ -100,6 +119,8 @@ const AuthPage = () => {
         return;
       }
 
+      // Alumni sign-ups land on the waiting screen rather than the form — the
+      // account exists but cannot submit until an admin approves it (0008).
       navigate(returnTo ?? COPY[role].after, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Terjadi kesalahan. Silakan coba lagi.');
@@ -191,7 +212,61 @@ const AuthPage = () => {
           </p>
         )}
 
+        {role === 'user' && mode === 'signup' && !notice && (
+          <p className="auth__hint">
+            Pendaftaran diverifikasi terlebih dahulu. Isi nama dan NISN sesuai ijazah agar admin
+            sekolah dapat mencocokkannya dengan data induk alumni — kuisioner baru dapat diisi
+            setelah pendaftaran disetujui.
+          </p>
+        )}
+
         <form onSubmit={handleSubmit}>
+          {mode === 'signup' && role === 'user' && (
+            <>
+              <div className="field">
+                <label className="field__label" htmlFor="auth-name">
+                  Nama Lengkap (Sesuai Ijazah)
+                </label>
+                <div className="field__control">
+                  <span className="field__icon" aria-hidden="true"><User size={18} /></span>
+                  <input
+                    id="auth-name"
+                    type="text"
+                    autoComplete="name"
+                    className="form-control form-control--with-icon"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Contoh: I Putu Gede Prasetya"
+                    maxLength={100}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="field__label" htmlFor="auth-nisn">NISN</label>
+                <div className="field__control">
+                  <span className="field__icon" aria-hidden="true"><IdCard size={18} /></span>
+                  <input
+                    id="auth-nisn"
+                    type="text"
+                    inputMode="numeric"
+                    className="form-control form-control--with-icon"
+                    value={nisn}
+                    onChange={(e) => setNisn(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="10 digit nomor NISN"
+                    minLength={10}
+                    maxLength={10}
+                    required
+                  />
+                </div>
+                <span className="field__hint">
+                  Dicocokkan dengan data induk alumni saat admin memverifikasi.
+                </span>
+              </div>
+            </>
+          )}
+
           <div className="field">
             <label className="field__label" htmlFor="auth-email">Email</label>
             <div className="field__control">
@@ -262,7 +337,7 @@ const AuthPage = () => {
             <button type="button" className="auth__link" onClick={() => switchMode('signup')}>
               Daftar di sini
             </button>
-            . Anda juga bisa mengisi kuisioner tanpa akun.
+            . Pendaftaran perlu disetujui admin sebelum kuisioner dapat diisi.
           </p>
         )}
 
