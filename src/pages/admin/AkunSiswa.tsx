@@ -19,7 +19,7 @@ import {
 } from '../../lib/adminData';
 import type { AlumniOverviewRow, AlumniRow } from '../../lib/adminData';
 import { downloadAllResponses } from '../../lib/exportResponses';
-import { avatarTint, formatDate, formatNumber, formatTimeWita, initials } from '../../lib/format';
+import { avatarTint, formatDate, formatNumber, formatTimeWita, initials, timeAgo } from '../../lib/format';
 import { JURUSAN } from '../../lib/tracerStudy';
 
 const PAGE_SIZE = 8;
@@ -30,7 +30,8 @@ const AkunSiswa = () => {
   const [page, setPage] = useState(1);
   const [search, setSearchValue] = useState('');
   const [jurusan, setJurusanValue] = useState('');
-  const [status, setStatusValue] = useState('');
+  const [kehadiran, setKehadiranValue] = useState('');
+  const [pengisian, setPengisianValue] = useState('');
   const [sortDesc, setSortDesc] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,25 +45,48 @@ const AkunSiswa = () => {
   // one interaction causes one render and one fetch.
   const setSearch = (v: string) => { setSearchValue(v); setPage(1); };
   const setJurusan = (v: string) => { setJurusanValue(v); setPage(1); };
-  const setStatus = (v: string) => { setStatusValue(v); setPage(1); };
+  const setKehadiran = (v: string) => { setKehadiranValue(v); setPage(1); };
+  const setPengisian = (v: string) => { setPengisianValue(v); setPage(1); };
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  /**
+   * `quiet` skips the spinner. The presence poll below runs every 20 seconds,
+   * and flashing "Memuat data…" over the whole table three times a minute
+   * would be worse than the staleness it fixes.
+   */
+  const load = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
     setError(null);
     try {
-      const res = await fetchAlumniOverview({ search, jurusan, status, page, pageSize: PAGE_SIZE });
+      const res = await fetchAlumniOverview({
+        search, jurusan, kehadiran, pengisian, page, pageSize: PAGE_SIZE,
+      });
       setRows(sortDesc ? res.rows : [...res.rows].reverse());
       setTotal(res.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memuat data alumni.');
+      setError(
+        err instanceof Error
+          ? `${err.message} — jika ini menyebut "sedang_online", jalankan migrasi 0010_user_presence.sql.`
+          : 'Gagal memuat data alumni.',
+      );
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
-  }, [search, jurusan, status, page, sortDesc]);
+  }, [search, jurusan, kehadiran, pengisian, page, sortDesc]);
 
   useEffect(() => {
     const id = setTimeout(() => void load(), 250);
     return () => clearTimeout(id);
+  }, [load]);
+
+  /**
+   * Presence goes stale on its own — an alumnus closing their laptop sends
+   * nothing — so the table has to re-ask rather than wait for an event. Twenty
+   * seconds against a two-minute window means the dot is never more than a
+   * sixth of a window behind.
+   */
+  useEffect(() => {
+    const id = window.setInterval(() => void load(true), 20_000);
+    return () => window.clearInterval(id);
   }, [load]);
 
   const handleSave = async (values: Partial<AlumniRow>) => {
@@ -184,10 +208,27 @@ const AkunSiswa = () => {
             <option value="">Semua Jurusan</option>
             {JURUSAN.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
-          <select className="admin-select" value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Filter status">
+          <select
+            className="admin-select"
+            value={kehadiran}
+            onChange={(e) => setKehadiran(e.target.value)}
+            aria-label="Filter kehadiran"
+          >
             <option value="">Semua Status</option>
-            <option value="aktif">Aktif</option>
-            <option value="tidak">Tidak Aktif</option>
+            <option value="online">Aktif (sedang online)</option>
+            <option value="offline">Tidak Aktif</option>
+          </select>
+          {/* Kept alongside presence rather than replaced by it: "has answered"
+              is a different question, and the roster is where it gets asked. */}
+          <select
+            className="admin-select"
+            value={pengisian}
+            onChange={(e) => setPengisian(e.target.value)}
+            aria-label="Filter pengisian kuisioner"
+          >
+            <option value="">Semua Pengisian</option>
+            <option value="sudah">Sudah Mengisi</option>
+            <option value="belum">Belum Mengisi</option>
           </select>
           <select
             className="admin-select"
@@ -250,8 +291,15 @@ const AkunSiswa = () => {
                     <span className="cell-sub">{row.angkatan ? `Angkatan ${row.angkatan}` : '—'}</span>
                   </td>
                   <td>
-                    <span className={`dot-status dot-status--${row.sudah_mengisi ? 'on' : 'off'}`}>
-                      {row.sudah_mengisi ? 'Aktif' : 'Tidak Aktif'}
+                    <span className={`dot-status dot-status--${row.sedang_online ? 'on' : 'off'}`}>
+                      {row.sedang_online ? 'Aktif' : 'Tidak Aktif'}
+                    </span>
+                    <span className="cell-sub">
+                      {row.sedang_online
+                        ? 'Sedang membuka situs'
+                        : row.last_seen_at
+                          ? `Terakhir dilihat ${timeAgo(row.last_seen_at)}`
+                          : 'Belum pernah masuk'}
                     </span>
                     <span className="cell-sub">{row.email ?? row.no_telepon ?? '—'}</span>
                   </td>

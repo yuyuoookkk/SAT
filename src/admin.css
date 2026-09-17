@@ -1618,8 +1618,10 @@
   background-color: currentColor;
 }
 
+/* Green for present, grey for absent. Not red: this reads "is on the site
+   right now", and being away from a website at 9pm is not a fault. */
 .dot-status--on  { color: #15803d; }
-.dot-status--off { color: #dc2626; }
+.dot-status--off { color: var(--admin-ink-mute); }
 
 .icon-btn--bare {
   border-color: transparent;

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { AdminAuthContext } from './adminAuthContext';
+import { usePresence } from './usePresence';
 import type { AdminAuth, Approval } from './adminAuthContext';
 
 /**
@@ -65,6 +66,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
   }, [session]);
 
   const uid = session?.user?.id;
+
+  // Heartbeat, so "Akun Siswa" can show who is on the site right now.
+  usePresence(uid);
 
   /**
    * Ask the database whether this account has been approved (migration 0008).

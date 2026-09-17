@@ -127,17 +127,23 @@ export async function fetchAlumni(
   return { rows: (data ?? []) as AlumniRow[], total: count ?? 0 };
 }
 
-/** A roster row plus whether that alumnus has actually responded. */
+/** A roster row plus whether that alumnus has responded, and whether they are here now. */
 export interface AlumniOverviewRow extends AlumniRow {
   sudah_mengisi: boolean;
   terakhir_mengisi: string | null;
+  /** Last heartbeat from any account matching this NISN; null = never signed in. */
+  last_seen_at: string | null;
+  /** True while that heartbeat is inside `presence_window()` — migration 0010. */
+  sedang_online: boolean;
 }
 
 export interface AlumniFilters {
   search?: string;
   jurusan?: string;
-  /** '' = any, 'aktif' = has responded, 'tidak' = has not. */
-  status?: string;
+  /** Presence: '' = any, 'online' = on the site now, 'offline' = not. */
+  kehadiran?: string;
+  /** Questionnaire: '' = any, 'sudah' = has responded, 'belum' = has not. */
+  pengisian?: string;
   page?: number;
   pageSize?: number;
 }
@@ -146,7 +152,7 @@ export interface AlumniFilters {
 export async function fetchAlumniOverview(
   f: AlumniFilters = {},
 ): Promise<Page<AlumniOverviewRow>> {
-  const { search = '', jurusan = '', status = '', page = 1, pageSize = 8 } = f;
+  const { search = '', jurusan = '', kehadiran = '', pengisian = '', page = 1, pageSize = 8 } = f;
   const from = (page - 1) * pageSize;
 
   let q = supabase
@@ -156,8 +162,10 @@ export async function fetchAlumniOverview(
     .range(from, from + pageSize - 1);
 
   if (jurusan) q = q.eq('jurusan', jurusan);
-  if (status === 'aktif') q = q.eq('sudah_mengisi', true);
-  if (status === 'tidak') q = q.eq('sudah_mengisi', false);
+  if (kehadiran === 'online') q = q.eq('sedang_online', true);
+  if (kehadiran === 'offline') q = q.eq('sedang_online', false);
+  if (pengisian === 'sudah') q = q.eq('sudah_mengisi', true);
+  if (pengisian === 'belum') q = q.eq('sudah_mengisi', false);
   if (search.trim()) {
     const term = `%${search.trim()}%`;
     q = q.or(`nama_lengkap.ilike.${term},nisn.ilike.${term},jurusan.ilike.${term}`);
