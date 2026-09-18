@@ -62,12 +62,14 @@
   --page-max: 1280px;
   --gutter: 80px;
 
-  /* Hero photograph.
-     The Figma hero uses a campus photo that could not be exported into this
-     repo (the Figma asset CDN is blocked by this environment's egress policy).
-     Drop the real image in and point this at it — everything else, including
-     the brand gradient scrim on top, already matches the design. */
-  --hero-image: linear-gradient(120deg, #06306e 0%, #0b5ed7 55%, #0a4bb0 100%);
+  /* Hero photograph — school supplied.
+     Every band that uses this lays its own brand scrim on top (.hero::after and
+     friends), so the photo reads as texture behind the copy rather than
+     competing with it. The gradient stays as a fallback for the moment before
+     the image lands, and for anyone it fails to load for. */
+  --hero-image:
+    url('./assets/photos/pajak-bertutur.jpg'),
+    linear-gradient(120deg, #06306e 0%, #0b5ed7 55%, #0a4bb0 100%);
 }
 
 * {
@@ -119,6 +121,12 @@ button {
 
 img {
   max-width: 100%;
+  /* `height: auto` is not optional here. The <img> tags carry width/height
+     attributes so the browser can reserve space before the photo loads, but
+     those attributes also set the *used* height — which pins the box and makes
+     any `aspect-ratio` below inert. The gallery cards rendered at the photos'
+     full pixel heights until this was added. */
+  height: auto;
 }
 
 :where(a, button, input, select, textarea):focus-visible {
@@ -1666,13 +1674,29 @@ textarea.form-control {
 }
 
 .aside-photo {
-  display: grid;
-  place-items: end start;
+  position: relative;
   height: 150px;
-  padding: 14px;
+  overflow: hidden;
   border-radius: var(--radius-md);
+  /* Shows through in the moment before the photo paints, and if it 404s. */
   background: linear-gradient(135deg, #0b5ed7 0%, #06306e 100%);
-  color: rgba(255, 255, 255, 0.85);
+}
+
+.aside-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.aside-photo figcaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 30px 14px 12px;
+  /* The caption sits over faces and monitors; a scrim keeps it readable
+     wherever the crop lands, and covers a second line if one ever appears. */
+  background: linear-gradient(to top, rgba(0, 25, 69, 0.88), rgba(0, 25, 69, 0));
+  color: rgba(255, 255, 255, 0.92);
   font-size: 12px;
   font-weight: 600;
 }
@@ -2049,4 +2073,67 @@ textarea.form-control {
   .gatepage { padding: 40px 16px; }
   .gatepage__card { padding: 28px 20px; }
   .gatepage__card h1 { font-size: 22px; line-height: 30px; }
+}
+
+/* ------------------------------------------------------------------ *
+   Galeri kegiatan (landing)
+ * ------------------------------------------------------------------ */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.gallery__item {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--surface);
+  border: 1px solid var(--line-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gallery__item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* A fixed ratio rather than the photo's own: three cards of different source
+   shapes would otherwise sit at three different heights. */
+.gallery__item img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  display: block;
+  background-color: var(--surface-sunken);
+}
+
+.gallery__item figcaption {
+  padding: 20px;
+}
+
+.gallery__item h3 {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--ink-900);
+  margin-bottom: 6px;
+}
+
+.gallery__item p {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--ink-600);
+}
+
+@media (max-width: 960px) {
+  .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .gallery { grid-template-columns: minmax(0, 1fr); }
 }

@@ -1,4 +1,5 @@
 import { CheckCircle2, Info, Mail } from 'lucide-react';
+import labKomputer from '../../assets/photos/lab-komputer.jpg';
 
 interface Props {
   title: string;
@@ -6,12 +7,7 @@ interface Props {
   bullets: string[];
 }
 
-/**
- * The explanatory rail beside the wizard. The photo panel is a branded
- * placeholder: the campus photograph in the design could not be exported from
- * Figma, so drop a real image at src/assets/campus.jpg and swap the <span> for
- * an <img> when you have it.
- */
+/** The explanatory rail beside the wizard. */
 const FormAside = ({ title, paragraphs, bullets }: Props) => (
   <aside className="form-aside">
     <section className="aside-card aside-card--info">
@@ -43,9 +39,16 @@ const FormAside = ({ title, paragraphs, bullets }: Props) => (
       </a>
     </section>
 
-    <span className="aside-photo" role="img" aria-label="Foto kegiatan alumni SMK TI Bali Global Jimbaran">
-      <span>Our Campus</span>
-    </span>
+    <figure className="aside-photo">
+      <img
+        src={labKomputer}
+        alt="Siswa dan guru SMK TI Bali Global Jimbaran bekerja bersama di laboratorium komputer"
+        loading="lazy"
+        width={850}
+        height={489}
+      />
+      <figcaption>Laboratorium Komputer</figcaption>
+    </figure>
   </aside>
 );
 
