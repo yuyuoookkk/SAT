@@ -14,43 +14,8 @@ import {
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import { fetchPublicStats } from '../lib/adminData';
-import labKomputer from '../assets/photos/lab-komputer.jpg';
-import pajakBertutur from '../assets/photos/pajak-bertutur.jpg';
-import upacaraAdat from '../assets/photos/upacara-adat.jpg';
 import type { PublicStats } from '../lib/adminData';
 import { formatNumber } from '../lib/format';
-
-/** School photographs, newest first. Captions double as the alt text prefix. */
-const galeri = [
-  {
-    src: pajakBertutur,
-    width: 1600,
-    height: 1066,
-    title: 'Pajak Bertutur 2025',
-    body: 'Siswa SMK TI Bali Global Jimbaran bersama tim KPP Pratama Badung Selatan dalam '
-      + 'program edukasi perpajakan untuk generasi muda.',
-    alt: 'Ratusan siswa berseragam biru dan panitia berkaus merah berfoto bersama di aula '
-      + 'sekolah pada acara Pajak Bertutur 2025',
-  },
-  {
-    src: labKomputer,
-    width: 850,
-    height: 489,
-    title: 'Pembelajaran di Laboratorium',
-    body: 'Praktik langsung bersama guru produktif — keterampilan yang kemudian terlacak '
-      + 'melalui Tracer Study ini.',
-    alt: 'Empat siswa berseragam putih memperhatikan dua guru yang bekerja di depan komputer '
-      + 'di laboratorium sekolah',
-  },
-  {
-    src: upacaraAdat,
-    width: 678,
-    height: 452,
-    title: 'Kegiatan Adat & Kebangsaan',
-    body: 'Sekolah membiasakan siswa menjaga budaya Bali sekaligus semangat kebangsaan.',
-    alt: 'Siswa dan guru mengenakan busana adat Bali putih berfoto bersama di halaman sekolah',
-  },
-];
 
 /**
  * Bento statistics inside the hero — Figma node 3431:47.
@@ -249,38 +214,6 @@ const LandingPage = () => {
                   </span>
                 </div>
               </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Galeri kegiatan */}
-      <section className="section" id="galeri">
-        <div className="container">
-          <div className="section-head">
-            <h2>Galeri Kegiatan Sekolah</h2>
-            <p>
-              Momen belajar, berprestasi dan berbudaya di SMK TI Bali Global Jimbaran — tempat
-              perjalanan setiap alumni dimulai.
-            </p>
-          </div>
-
-          <div className="gallery">
-            {galeri.map((foto) => (
-              <figure className="gallery__item" key={foto.title}>
-                <img
-                  src={foto.src}
-                  alt={foto.alt}
-                  width={foto.width}
-                  height={foto.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-                <figcaption>
-                  <h3>{foto.title}</h3>
-                  <p>{foto.body}</p>
-                </figcaption>
-              </figure>
             ))}
           </div>
         </div>
