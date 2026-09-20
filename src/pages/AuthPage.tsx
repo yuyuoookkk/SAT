@@ -3,33 +3,36 @@ import type { FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AlertTriangle,
-  ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   Fingerprint,
   GraduationCap,
   IdCard,
-  Lock,
   Mail,
+  Pencil,
   Phone,
-  ShieldCheck,
   User,
   Users,
 } from 'lucide-react';
+import Header from '../components/layout/Header';
 import { useAdminAuth } from '../lib/adminAuthContext';
 import { JENIS_KELAMIN, JURUSAN } from '../lib/tracerStudy';
 
 type Role = 'user' | 'admin';
 type Mode = 'login' | 'signup';
 
-const COPY: Record<Role, { title: string; blurb: string; after: string }> = {
+/** Per-role wording for the blue band and the submit button. */
+const COPY: Record<Role, { title: string; masuk: string; daftar: string; after: string }> = {
   user: {
     title: 'Alumni',
-    blurb: 'Masuk untuk mengisi kuisioner Tracer Study dan melihat data Anda.',
+    masuk: 'Masuk Untuk Mengisi Kuisioner Tracer Study SMK TI Bali Global Jimbaran',
+    daftar: 'Daftar Akun Alumni SMK TI Bali Global Jimbaran',
     after: '/tracer-form',
   },
   admin: {
     title: 'Admin',
-    blurb: 'Masuk untuk mengelola data alumni SMK TI Bali Global Jimbaran.',
+    masuk: 'Masuk Untuk Mengelola Data Alumni SMK TI Bali Global Jimbaran',
+    daftar: 'Masuk Untuk Mengelola Data Alumni SMK TI Bali Global Jimbaran',
     after: '/admin',
   },
 };
@@ -149,17 +152,17 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="auth">
-      <div className={`auth__card${effectiveMode === 'signup' ? ' auth__card--wide' : ''}`}>
-        <button type="button" className="auth__back" onClick={() => navigate('/')}>
-          <ArrowLeft size={15} />
-          Kembali ke Beranda
-        </button>
+    <div className="app-container auth-page">
+      <Header />
 
-        <span className="auth__logo" aria-hidden="true">SMK</span>
-        <h1>Tracer Study Alumni</h1>
-        <p className="auth__blurb">{COPY[role].blurb}</p>
+      <main className="auth">
+        <div className={`auth__card${effectiveMode === 'signup' ? ' auth__card--wide' : ''}`}>
+          <div className="auth__band">
+            <h1>Data Responden Tracer Study</h1>
+            <p>{effectiveMode === 'signup' ? COPY[role].daftar : COPY[role].masuk}</p>
+          </div>
 
+          <div className="auth__body">
         {sentFromForm && (
           <p className="auth__hint">
             Kuisioner Tracer Study hanya dapat diisi setelah masuk, agar jawaban Anda tersimpan
@@ -187,7 +190,7 @@ const AuthPage = () => {
             className={`auth__role${role === 'admin' ? ' is-active' : ''}`}
             onClick={() => setRole('admin')}
           >
-            <ShieldCheck size={20} />
+            <User size={20} />
             <span>Admin</span>
             <small>Pengelola</small>
           </button>
@@ -223,13 +226,6 @@ const AuthPage = () => {
           <p className="admin-notice">
             <CheckCircle2 size={16} />
             {notice}
-          </p>
-        )}
-
-        {role === 'admin' && !notice && (
-          <p className="auth__hint">
-            Akun admin tidak dapat didaftarkan sendiri. Untuk menambah admin baru, admin yang
-            sudah terdaftar harus memasukkan akunnya ke daftar admin.
           </p>
         )}
 
@@ -400,7 +396,7 @@ const AuthPage = () => {
           <div className="field">
             <label className="field__label" htmlFor="auth-password">Kata Sandi</label>
             <div className="field__control">
-              <span className="field__icon" aria-hidden="true"><Lock size={18} /></span>
+              <span className="field__icon" aria-hidden="true"><Pencil size={18} /></span>
               <input
                 id="auth-password"
                 type="password"
@@ -408,6 +404,7 @@ const AuthPage = () => {
                 className="form-control form-control--with-icon"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Contoh: Stibajra2026"
                 minLength={effectiveMode === 'signup' ? 8 : undefined}
                 required
               />
@@ -421,7 +418,7 @@ const AuthPage = () => {
             <div className="field">
               <label className="field__label" htmlFor="auth-confirm">Ulangi Kata Sandi</label>
               <div className="field__control">
-                <span className="field__icon" aria-hidden="true"><Lock size={18} /></span>
+                <span className="field__icon" aria-hidden="true"><Pencil size={18} /></span>
                 <input
                   id="auth-confirm"
                   type="password"
@@ -435,14 +432,24 @@ const AuthPage = () => {
             </div>
           )}
 
+          <hr className="auth__rule" />
+
           <button type="submit" className="btn btn-primary auth__submit" disabled={busy}>
             {busy
               ? 'Memproses…'
               : effectiveMode === 'login'
-                ? `Masuk sebagai ${COPY[role].title}`
-                : `Daftar sebagai ${COPY[role].title}`}
+                ? `Masuk Sebagai ${COPY[role].title}`
+                : `Daftar Sebagai ${COPY[role].title}`}
+            {!busy && <ArrowRight size={16} />}
           </button>
         </form>
+
+        {role === 'admin' && !notice && (
+          <p className="auth__alt">
+            Akun admin tidak dapat didaftarkan sendiri. Untuk menambah admin baru, admin yang
+            sudah terdaftar harus memasukkan akunnya ke daftar admin.
+          </p>
+        )}
 
         {role === 'user' && effectiveMode === 'login' && (
           <p className="auth__alt">
@@ -459,7 +466,21 @@ const AuthPage = () => {
             Akun ini sudah masuk tetapi belum terdaftar sebagai admin.
           </p>
         )}
-      </div>
+          </div>
+        </div>
+      </main>
+
+      <footer className="auth-foot">
+        <span className="auth-foot__brand">SMK TI Bali Global</span>
+        <span className="auth-foot__legal">
+          &copy; {new Date().getFullYear()} &ndash; SMK TI Bali Global Jimbaran
+        </span>
+        <nav className="auth-foot__links">
+          <a href="#bantuan">Pusat Bantuan</a>
+          <a href="#kebijakan">Kebijakan Data</a>
+          <a href="mailto:bkk@smktibgjimbaran.sch.id">Kontak Admin</a>
+        </nav>
+      </footer>
     </div>
   );
 };

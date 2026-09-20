@@ -1145,69 +1145,120 @@
 /* ===========================================================================
    Auth entry page (role picker + login / sign-up)
    =========================================================================== */
+/* The page now carries the public top bar and a slim footer, so the centred
+   panel is a flex child rather than a full-viewport grid. */
+.auth-page {
+  background-color: var(--admin-bg);
+}
+
 .auth {
-  min-height: 100vh;
+  flex: 1;
   display: grid;
   place-items: center;
-  padding: 32px 20px;
+  padding: 56px 20px;
   background-color: var(--admin-bg);
 }
 
 .auth__card {
   position: relative;
   width: 100%;
-  max-width: 460px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 36px 32px 32px;
+  max-width: 660px;
+  overflow: hidden;
   background-color: var(--admin-surface);
   border: 1px solid var(--admin-line);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
 }
 
-.auth__back {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: none;
-  background: transparent;
-  padding: 0;
-  font-family: var(--font-brand);
-  font-size: 13px;
-  color: var(--admin-ink-mute);
-}
-
-.auth__back:hover {
-  color: var(--brand-700);
-}
-
-.auth__logo {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-pill);
+/* Blue band, same photograph-behind-a-scrim treatment as the questionnaire. */
+.auth__band {
+  position: relative;
+  overflow: hidden;
+  padding: 26px 34px 24px;
   background-color: var(--brand-700);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 14px;
+  background-image: var(--hero-image);
+  background-size: cover;
+  background-position: center;
 }
 
-.auth__card h1 {
+.auth__band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(11, 94, 215, 0.88), rgba(0, 71, 169, 0.92));
+}
+
+.auth__band > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth__band h1 {
   font-family: var(--font-heading);
-  font-size: 24px;
-  line-height: 32px;
+  font-size: 26px;
+  line-height: 34px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.auth__band p {
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--brand-050);
+}
+
+.auth__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 34px 30px;
+}
+
+.auth__rule {
+  border: none;
+  border-top: 1px solid var(--admin-line);
+  margin: 6px 0 2px;
+}
+
+/* Slim three-part footer. */
+.auth-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 34px;
+  background-color: var(--admin-surface);
+  border-top: 1px solid var(--admin-line);
+}
+
+.auth-foot__brand {
+  font-family: var(--font-brand);
+  font-size: 14px;
+  font-weight: 700;
   color: var(--admin-ink);
 }
 
-.auth__blurb {
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--ink-600);
+.auth-foot__legal {
+  font-size: 12px;
+  color: var(--admin-ink-mute);
+}
+
+.auth-foot__links {
+  display: flex;
+  gap: 20px;
+}
+
+.auth-foot__links a {
+  font-size: 12px;
+  color: var(--admin-ink-mute);
+  text-decoration: none;
+}
+
+.auth-foot__links a:hover {
+  color: var(--brand-700);
+  text-decoration: underline;
 }
 
 /* The two role buttons */
@@ -1291,8 +1342,9 @@
 }
 
 .auth__submit {
+  align-self: center;
   margin-top: 4px;
-  width: 100%;
+  min-width: 260px;
 }
 
 .auth__hint {
@@ -1321,8 +1373,12 @@
   text-decoration: underline;
 }
 
-@media (max-width: 420px) {
-  .auth__card { padding: 28px 20px 24px; }
+@media (max-width: 520px) {
+  .auth__band { padding: 22px 20px 20px; }
+  .auth__band h1 { font-size: 21px; line-height: 28px; }
+  .auth__body { padding: 22px 20px 26px; }
+  .auth__submit { min-width: 0; width: 100%; }
+  .auth-foot { padding: 16px 20px; justify-content: center; text-align: center; }
 }
 
 /* ===========================================================================
@@ -1764,7 +1820,7 @@
    The card widens and the form becomes two columns, with `display: contents`
    letting the sign-up-only fields take part directly. */
 .auth__card--wide {
-  max-width: 720px;
+  max-width: 760px;
 }
 
 .auth__grid {
@@ -1780,6 +1836,7 @@
   }
 
   .auth__card--wide form > .field--wide,
+  .auth__card--wide form > .auth__rule,
   .auth__card--wide form > .auth__submit {
     grid-column: 1 / -1;
   }
