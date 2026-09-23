@@ -8,3 +8,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+/**
+ * Exported for the one call that cannot go through the client: the "I am
+ * leaving" beacon in usePresence, which needs `fetch(..., { keepalive: true })`
+ * so the browser finishes it after the tab is gone. supabase-js offers no way
+ * to set that flag.
+ */
+export const SUPABASE_URL = supabaseUrl;
+export const SUPABASE_ANON_KEY = supabaseAnonKey;

@@ -67,8 +67,9 @@ export const AdminAuthProvider = ({ children }: { children: ReactNode }) => {
 
   const uid = session?.user?.id;
 
-  // Heartbeat, so "Akun Siswa" can show who is on the site right now.
-  usePresence(uid);
+  // Heartbeat, so "Akun Siswa" can show who is on the site right now. Keyed to
+  // the token rather than the id: the leave beacon has to sign its own request.
+  usePresence(session?.access_token);
 
   /**
    * Ask the database whether this account has been approved (migration 0008).

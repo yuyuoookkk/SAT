@@ -79,13 +79,15 @@ const AkunSiswa = () => {
   }, [load]);
 
   /**
-   * Presence goes stale on its own — an alumnus closing their laptop sends
-   * nothing — so the table has to re-ask rather than wait for an event. Twenty
-   * seconds against a two-minute window means the dot is never more than a
-   * sixth of a window behind.
+   * Presence can go stale without anything being sent — a laptop lid closing,
+   * a dropped connection — so the table re-asks rather than waiting for an
+   * event. Fifteen seconds against a sixty-second window keeps the dot within
+   * a quarter of a window of the truth, and a tab that closes cleanly reports
+   * itself immediately (see usePresence), so most changes land on the next
+   * poll rather than at the end of the window.
    */
   useEffect(() => {
-    const id = window.setInterval(() => void load(true), 20_000);
+    const id = window.setInterval(() => void load(true), 15_000);
     return () => window.clearInterval(id);
   }, [load]);
 
