@@ -77,6 +77,7 @@ Semua di `supabase/migrations/`, dijalankan berurutan 0001 → 0012.
 | `0010` | **Penanda online** (`user_presence`) |
 | `0011` | Pencocokan online lewat email |
 | `0012` | Perbaikan akurasi penanda online |
+| `0013` | **Foreign key** `tracer_study.nisn` → `alumni.nisn` |
 
 ---
 
@@ -276,13 +277,147 @@ mana-mana:
 
 > *P: Hubungan `alumni` dan `tracer_study` itu apa?*
 >
-> "Dicocokkan lewat kolom `nisn`, tapi **sengaja bukan foreign key**. Alasannya:
-> alumni boleh mengisi NISN yang belum ada di data induk. Kalau dipasang foreign
-> key, pengisian seperti itu akan ditolak.
+> "**Foreign key**, Pak — `tracer_study.nisn` menunjuk ke `alumni.nisn`.
+> Dipasang di migrasi 0013 baris 142, relasinya satu-ke-banyak: satu alumni
+> bisa punya banyak jawaban kuisioner.
 >
-> Gantinya ada trigger `sync_alumni_from_submission` di migrasi 0004 baris 49 —
-> begitu ada jawaban masuk dengan NISN baru, alumni itu otomatis ditambahkan ke
-> data induk."
+> Yang menarik, foreign key ini tidak bisa langsung dipasang begitu saja.
+> Alumni boleh mengisi walaupun NISN-nya belum ada di data induk — trigger
+> `sync_alumni_from_submission` yang menambahkannya. Tapi trigger itu tadinya
+> `AFTER INSERT`, padahal foreign key diperiksa **sebelum** trigger jalan. Jadi
+> pengisian dari alumni baru langsung ditolak:
+>
+> ```
+> ERROR: violates foreign key constraint "tracer_study_nisn_fkey"
+> DETAIL: Key (nisn)=(0099887766) is not present in table "alumni".
+> ```
+>
+> Solusinya bukan membatalkan foreign key-nya, tapi **mengubah urutan** —
+> trigger-nya dipindah ke `BEFORE INSERT`, jadi baris di data induk dibuat
+> lebih dulu, baru foreign key-nya diperiksa. Dari sisi alumni tidak ada yang
+> berubah."
+
+> *P: Kalau alumni dihapus, jawaban kuisionernya ikut terhapus?*
+>
+> "Tidak. Foreign key-nya `ON DELETE SET NULL` — jawabannya tetap tersimpan,
+> cuma tautan ke data induknya dilepas. Data jawaban itu inti dari sistem ini,
+> jadi tidak boleh hilang gara-gara admin merapikan daftar.
+>
+> Dan `ON UPDATE CASCADE` — kalau admin membetulkan NISN yang salah ketik di
+> data induk, semua jawaban yang menunjuk ke situ ikut terbetulkan sendiri."
+
+> *P: Kenapa `account_requests.nisn` tidak dijadikan foreign key juga?*
+>
+> "Justru tidak boleh, Pak. NISN di situ adalah **klaim** dari pendaftar, belum
+> tentu benar. Kalau dipasang foreign key, orang yang mengisi NISN asal-asalan
+> akan ditolak saat mendaftar — padahal yang kita mau justru pendaftarannya
+> masuk dulu supaya admin bisa melihat dan menolaknya secara sadar.
+>
+> Itu sebabnya di halaman Persetujuan ada keterangan 'Tidak ada di data induk'."
+
+### JOIN
+
+> *P: Jenis JOIN apa yang menampilkan semua baris dari tabel paling kiri?*
+>
+> "**LEFT JOIN**, atau lengkapnya LEFT OUTER JOIN. Semua baris tabel kiri tetap
+> keluar walaupun tidak ada pasangannya di tabel kanan; kolom dari kanan diisi
+> NULL."
+
+> *P: Di proyek ini dipakai di mana?*
+>
+> "Di view persetujuan, migrasi 0009 baris 232:
+>
+> ```sql
+> from public.account_requests r
+> left join public.alumni a on a.nisn = r.nisn;
+> ```
+>
+> Tabel kirinya `account_requests`. Harus LEFT JOIN karena **semua pendaftar
+> wajib muncul di antrean**, termasuk yang NISN-nya tidak ada di data induk —
+> justru itu yang paling perlu dilihat admin. Kalau INNER JOIN, pendaftar yang
+> bukan alumni malah hilang dari layar, padahal itu yang harus ditolak.
+>
+> Kolom `cocok_roster` di baris 225 memanfaatkan sifat itu: `a.id is not null`
+> bernilai false persis ketika tidak ada pasangan di data induk."
+
+> *P: Ada INNER JOIN juga?*
+>
+> "Ada, di migrasi 0012 baris 121:
+>
+> ```sql
+> select max(p.last_seen_at)
+>   from public.user_presence p
+>   join kandidat k on k.user_id = p.user_id;
+> ```
+>
+> Di sini INNER JOIN yang benar, karena yang dicari memang cuma akun yang ada
+> di dua-duanya. Akun tanpa catatan kehadiran tidak perlu ikut."
+
+### Fungsi agregat & GROUP BY
+
+> *P: Query mana yang menghitung bekerja, wirausaha, dan belum bekerja?*
+>
+> "Fungsi `admin_dashboard()`, migrasi 0001 baris 195–201:
+>
+> ```sql
+> count(*) filter (where status_saat_ini in ('bekerja', 'bekerja_kuliah')),
+> count(*) filter (where status_saat_ini in ('kuliah')),
+> count(*) filter (where status_saat_ini in ('wirausaha', 'kuliah_wirausaha')),
+> count(*)
+> ```
+>
+> Fungsi agregatnya `COUNT()`."
+
+> *P: Kenapa tidak pakai GROUP BY?*
+>
+> "Karena kategorinya tidak satu lawan satu, Pak. Di database ada 6 nilai
+> status, tapi di layar cuma 4 kotak — `bekerja_kuliah` harus masuk hitungan
+> **Bekerja**, dan `kuliah_wirausaha` masuk **Wirausaha**.
+>
+> Kalau `GROUP BY status_saat_ini`, hasilnya 6 baris mentah yang masih harus
+> dikelompokkan lagi di aplikasi. Dengan `COUNT(*) FILTER`, keempat kotak itu
+> jadi dalam satu baris, satu kali baca tabel."
+
+> *P: Coba tulis versi GROUP BY-nya.*
+>
+> ```sql
+> select case
+>          when status_saat_ini in ('bekerja','bekerja_kuliah')    then 'Bekerja'
+>          when status_saat_ini = 'kuliah'                          then 'Kuliah'
+>          when status_saat_ini in ('wirausaha','kuliah_wirausaha') then 'Wirausaha'
+>          else 'Belum Bekerja'
+>        end as kategori,
+>        count(*) as jumlah
+>   from tracer_study
+>  group by 1;
+> ```
+
+> *P: GROUP BY yang asli dipakai di mana?*
+>
+> "Satu-satunya untuk statistik ada di migrasi 0001 baris 218–222, untuk grafik
+> per jurusan:
+>
+> ```sql
+> select coalesce(nullif(t.jurusan, ''), 'Lainnya') as jurusan,
+>        count(*) as total
+>   from tracer_study t
+>  group by 1
+> ```
+>
+> Di sini GROUP BY memang tepat, karena tiap jurusan kelompok yang berdiri
+> sendiri — tidak ada yang perlu digabung seperti kasus status."
+
+> *P: Agregat apa lagi yang dipakai?*
+>
+> | Baris (0001) | Untuk | Agregat |
+> |---|---|---|
+> | 186 | Total alumni | `COUNT(*)` |
+> | 190 | Sudah mengisi | `COUNT(DISTINCT t.nisn)` |
+> | 219 | Per jurusan | `COUNT(*)` + `GROUP BY` |
+> | 226 | Kesesuaian Link & Match | `COUNT(*) FILTER` |
+>
+> "Yang baris 190 pakai `DISTINCT` supaya alumni yang mengisi dua kali tidak
+> terhitung dua orang."
 
 ### Keamanan (bagian paling sering ditanya)
 
@@ -491,7 +626,7 @@ Hafalkan lima ini. Kalau bingung, salah satunya biasanya cocok.
 ## Persiapan sebelum presentasi
 
 - [ ] `git pull origin main` — pastikan kode di laptop yang terbaru
-- [ ] Jalankan `0012_presence_accuracy.sql` di Supabase
+- [ ] Jalankan `0012_presence_accuracy.sql` dan `0013_alumni_tracer_foreign_key.sql` di Supabase
 - [ ] Restart dev server, cek semua halaman terbuka
 - [ ] Buka VS Code, pastikan Ctrl+Shift+F berfungsi
 - [ ] Buka satu tab Supabase → Table Editor, untuk jaga-jaga ditanya isi tabel
