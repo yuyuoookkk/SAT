@@ -408,14 +408,16 @@ mana-mana:
 > sendiri — tidak ada yang perlu digabung seperti kasus status."
 
 > *P: Agregat apa lagi yang dipakai?*
->
-> | Baris (0001) | Untuk | Agregat |
-> |---|---|---|
-> | 186 | Total alumni | `COUNT(*)` |
-> | 190 | Sudah mengisi | `COUNT(DISTINCT t.nisn)` |
-> | 219 | Per jurusan | `COUNT(*)` + `GROUP BY` |
-> | 226 | Kesesuaian Link & Match | `COUNT(*) FILTER` |
->
+
+Semuanya di `0001_admin_schema.sql`:
+
+| Baris | Untuk | Agregat |
+|---|---|---|
+| 186 | Total alumni | `COUNT(*)` |
+| 190 | Sudah mengisi | `COUNT(DISTINCT t.nisn)` |
+| 219 | Per jurusan | `COUNT(*)` + `GROUP BY` |
+| 226 | Kesesuaian Link & Match | `COUNT(*) FILTER` |
+
 > "Yang baris 190 pakai `DISTINCT` supaya alumni yang mengisi dua kali tidak
 > terhitung dua orang."
 
