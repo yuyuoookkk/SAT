@@ -2,7 +2,16 @@ import type React from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Download, Home } from 'lucide-react';
 
-/** Step 4 — Figma node 3442:956 ("Berhasil Dikirim!"). */
+/**
+ * Questionnaire step 4 — "Berhasil Dikirim!" (Figma node 3442:956).
+ *
+ * Confirmation only; it collects nothing. The submission already happened at
+ * the end of step 3, and this screen exists so the alumnus knows it landed.
+ *
+ * Worth the extra step: without it, a form that simply vanishes leaves people
+ * unsure whether to fill it in again, and duplicate responses are far more
+ * expensive to clean up than one static page is to draw.
+ */
 const Step4Selesai: React.FC = () => (
   <div className="done animate-fade-in">
     <div className="done__badge">

@@ -1,3 +1,35 @@
+/* =============================================================================
+ * Sign in and sign up, for both audiences, on one page.
+ *
+ * The role buttons at the top switch between them; everything below reshapes
+ * itself to match.
+ *
+ * THE TWO ROLES ARE NOT SYMMETRIC
+ *
+ *   Alumni  may sign up and log in. Signing up collects the identity an admin
+ *           needs in order to verify them — name, NISN, NIK, jurusan,
+ *           WhatsApp, sex — because approving an email address alone would be
+ *           approving nothing.
+ *
+ *   Admin   may only log in. There is deliberately no Daftar tab: what makes
+ *           an admin is membership of the `admin_users` allowlist (migration
+ *           0002), and no sign-up form can grant that. Offering one would only
+ *           teach people to expect an account that never arrives. A URL asking
+ *           for ?role=admin&mode=signup is ignored rather than honoured.
+ *
+ * AFTER A SUCCESSFUL SIGN-UP
+ *
+ * The alumnus is NOT taken to the questionnaire. Their account is created but
+ * unapproved, so RequireApproval shows them the waiting screen. The details
+ * they typed travel two ways into the database — as auth metadata read by a
+ * trigger, and through request_account_approval() — because on a managed
+ * Supabase instance the trigger on auth.users may not be creatable. Both are
+ * idempotent, so whichever runs first wins and the other does nothing.
+ *
+ * `returnTo` carries the page a guard bounced them from, so signing in lands
+ * them back where they were going rather than on a generic home page.
+ * ========================================================================== */
+
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';

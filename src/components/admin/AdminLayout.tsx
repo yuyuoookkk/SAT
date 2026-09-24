@@ -1,3 +1,19 @@
+/**
+ * The shell every admin screen sits inside: sidebar, top bar and footer.
+ *
+ * Holds the four-item navigation, and with it the count of sign-ups waiting
+ * for a decision — shown as a red badge on "Persetujuan". An approval queue
+ * nobody notices is the same as no approval at all, so the number has to
+ * follow the admin around rather than wait to be discovered.
+ *
+ * Signing out here returns to /auth?role=admin rather than the public home
+ * page, since an admin who just signed out is usually about to sign back in.
+ *
+ * If the badge count fails — migration 0008 not applied, for instance — it
+ * simply shows nothing. A layout that refuses to render because one number is
+ * missing would take the whole dashboard with it.
+ */
+
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';

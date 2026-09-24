@@ -16,7 +16,25 @@ interface Props {
   nextStep: () => void;
 }
 
-/** Step 1 — Figma node 3433:2 ("Data Responden Tracer Study"). */
+/**
+ * Questionnaire step 1 — "Data Responden Tracer Study" (Figma node 3433:2).
+ *
+ * Establishes WHO is answering, which is what lets a response be matched back
+ * to the school's roster later: NISN and NIK are the two identifiers the
+ * school already holds.
+ *
+ * Validation is done as the alumnus types rather than only on submit — NISN
+ * accepts ten digits and nothing else, the phone number strips punctuation so
+ * a pasted "+62 812-3456" is cleaned instead of rejected. Telling someone
+ * their NISN is wrong after they have filled in twenty more fields is the
+ * wrong moment to tell them.
+ *
+ * Tahun Lulus uses YearField, a year-only picker: the browser has no
+ * <input type="year">, and a full date would demand a day nobody remembers.
+ *
+ * The last question here, Status Kegiatan, decides which branch of step 2 the
+ * alumnus is shown.
+ */
 const Step1Identitas: React.FC<Props> = ({ formData, setField, nextStep }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

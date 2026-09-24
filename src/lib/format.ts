@@ -1,3 +1,16 @@
+/* =============================================================================
+ * Shared formatting helpers.
+ *
+ * Everything the user reads as a number, date or name passes through here, so
+ * the whole application is consistent by construction rather than by everyone
+ * remembering the same conventions.
+ *
+ * Dates are rendered in Asia/Makassar (WITA) rather than the viewer's own
+ * timezone. An admin in Bali reading "08.16 WITA" knows what that means; the
+ * same instant shown as the browser's local time would quietly mislead anyone
+ * opening the dashboard from elsewhere.
+ * ========================================================================== */
+
 /** Shared formatting helpers for the admin screens. */
 
 const ID = 'id-ID';

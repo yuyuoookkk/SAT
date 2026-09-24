@@ -1,3 +1,23 @@
+/* =============================================================================
+ * Questionnaire step 2 — "Informasi Kegiatan".
+ *
+ * The branching step, and the reason `tracer_study` is 51 columns wide.
+ *
+ * Step 1 asked what the alumnus is doing now. This step asks about THAT, and
+ * only that: someone working is asked about their employer and salary band,
+ * someone studying about their campus and funding, someone in business about
+ * turnover and staff, someone unemployed about what is getting in the way.
+ *
+ * A single flat form carrying every branch would be six times too long and
+ * would ask most people questions that do not apply to them, which is how
+ * questionnaires get abandoned halfway.
+ *
+ * Columns belonging to branches the alumnus did not take are simply left NULL
+ * in the database. That is why the table is wide and sparse — it is one row
+ * per person rather than one row per situation, which keeps every response
+ * comparable in a single query.
+ * ========================================================================== */
+
 import type React from 'react';
 import type { ComponentType } from 'react';
 import {

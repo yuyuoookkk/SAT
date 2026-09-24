@@ -1,3 +1,33 @@
+/* =============================================================================
+ * Admin screen 2 of 4 — "Akun Siswa".
+ *
+ * The school's master list of alumni (table `alumni`), which is a different
+ * thing from the questionnaire responses. A person exists here whether or not
+ * they have ever answered, and whether or not they have ever made an account.
+ *
+ * WHAT AN ADMIN DOES HERE
+ *
+ *   - Add, edit or delete a single alumnus (AlumniDialog)
+ *   - Import a whole cohort from CSV, upserted on NISN so re-importing a
+ *     corrected file updates rather than duplicates
+ *   - Export every questionnaire response to Excel
+ *   - See who is on the site right now
+ *
+ * THE TWO FILTERS, WHICH ANSWER DIFFERENT QUESTIONS
+ *
+ *   Aktif / Tidak Aktif    Is this person on the website at this moment?
+ *                          Live presence — see usePresence and migration 0012.
+ *   Sudah / Belum Mengisi  Have they ever filed a response? A permanent fact.
+ *
+ * They were one filter once, and "Aktif" meant "has answered" — a state that
+ * could never change back, which made the column useless. Splitting them is
+ * what made both questions answerable.
+ *
+ * Rows are read from the view `admin_alumni_overview`, which joins the roster
+ * to response history and to presence so this page issues one query instead of
+ * three per row.
+ * ========================================================================== */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ChevronLeft,

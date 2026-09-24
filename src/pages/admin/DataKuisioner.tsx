@@ -1,3 +1,28 @@
+/* =============================================================================
+ * Admin screen 3 of 4 — "Data Kuisioner".
+ *
+ * Every questionnaire response the school has received, one row per
+ * submission, straight out of the `tracer_study` table.
+ *
+ * Where "Akun Siswa" is the list of people, this is the list of answers. An
+ * alumnus with no response never appears here; the same alumnus appears on
+ * both screens once they answer.
+ *
+ * FOUR SUMMARY CARDS, then a filterable table
+ *
+ * The cards reuse admin_dashboard() rather than counting the rows on screen —
+ * the table is paginated eight at a time, so counting what is visible would
+ * describe the page instead of the cohort.
+ *
+ * Filters cover jurusan, angkatan, status and completeness, and the search box
+ * matches name, NISN or jurusan. All of it is applied in Postgres, not in the
+ * browser: filtering client-side would mean downloading every response first,
+ * which defeats the pagination and leaks data the filters were meant to narrow.
+ *
+ * Export downloads ALL responses, not the page on screen and not just what the
+ * current filters allow — see lib/exportResponses.ts.
+ * ========================================================================== */
+
 import { useCallback, useEffect, useState } from 'react';
 import {
   Briefcase,

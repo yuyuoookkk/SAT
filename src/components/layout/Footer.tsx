@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Globe, Mail } from 'lucide-react';
 
-/** Four-column public footer. */
+/**
+ * Public footer, four columns.
+ *
+ * Carries the one thing an alumnus stuck on the questionnaire actually needs:
+ * who to contact at the school (Bursa Kerja Khusus). A tracer study depends on
+ * voluntary participation, so a dead end here is a response not collected.
+ *
+ * The sign-in page uses a slimmer footer of its own — a four-column block
+ * under a single login card is more furniture than page.
+ */
 const Footer = () => (
   <footer className="sitefoot">
     <div className="container sitefoot__grid">

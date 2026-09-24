@@ -1,6 +1,27 @@
 import { fetchAllResponses } from './adminData';
 import { STATUS_LABEL } from './adminData';
 
+/* =============================================================================
+ * Export every questionnaire response to Excel.
+ *
+ * "Every" is the point: not the page on screen, and not just what the current
+ * filters allow. An admin exporting for accreditation needs the whole cohort,
+ * and a spreadsheet that silently contained only the visible eight rows would
+ * be worse than no export at all.
+ *
+ * PostgREST caps a response at 1000 rows, so fetchAllResponses pages through
+ * in batches and reports progress while it goes — on a large cohort the button
+ * would otherwise look frozen.
+ *
+ * The 51 columns below mirror the questionnaire. Identifiers are written as
+ * TEXT rather than numbers, because Excel helpfully turns the NISN 0071234567
+ * into 71234567 and the school's records stop matching.
+ *
+ * write-excel-file is imported lazily, inside the function: it is only needed
+ * by an admin who clicks Export, so it should not be in the bundle every
+ * alumnus downloads.
+ * ========================================================================== */
+
 /** A column in the exported workbook. */
 interface Col {
   header: string;

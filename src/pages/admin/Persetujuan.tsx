@@ -1,3 +1,38 @@
+/* =============================================================================
+ * Admin screen 4 of 4 — "Persetujuan".
+ *
+ * The queue of alumni who have signed up and are waiting to be let in. Until
+ * an admin approves them here, their account exists and can log in, but cannot
+ * file a questionnaire response.
+ *
+ * WHY THE SCHOOL NEEDS THIS AT ALL
+ *
+ * Without it, anyone who finds the URL can register and submit answers, and
+ * the resulting data describes strangers as readily as alumni. Approval is
+ * what makes the dataset worth using for accreditation.
+ *
+ * WHAT THE ADMIN IS SHOWN, AND WHY
+ *
+ * Name, NISN, NIK, jurusan, WhatsApp and sex — collected at sign-up — next to
+ * a verdict: does that NISN exist in the school's own roster?
+ *
+ *     "Cocok: Rekayasa Perangkat Lunak (RPL) · 2024"   found, with its details
+ *     "Tidak ada di data induk"                        not found
+ *     "Berbeda dari data induk"                        found, but the jurusan
+ *                                                      they typed disagrees
+ *
+ * The mismatch is flagged rather than quietly corrected: the roster is the
+ * record, and a disagreement is exactly the thing an admin should decide on.
+ *
+ * WHAT THIS PAGE CANNOT DO
+ *
+ * The client may write `status` and `note` and nothing else. Who decided, and
+ * when, are stamped by a database trigger (migration 0008), so the audit trail
+ * cannot be forged from a browser. Approval itself is enforced by the INSERT
+ * policy on tracer_study — an unapproved account is refused by Postgres even
+ * if it never loads this application.
+ * ========================================================================== */
+
 import { useCallback, useEffect, useState } from 'react';
 import {
   BadgeCheck,

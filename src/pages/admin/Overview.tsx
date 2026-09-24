@@ -1,3 +1,26 @@
+/* =============================================================================
+ * Admin screen 1 of 4 — "Overview".
+ *
+ * The answer to "how is the tracer study going?" in one page: how many alumni
+ * the school holds, how many have answered, and where the ones who answered
+ * ended up.
+ *
+ * WHERE THE NUMBERS COME FROM
+ *
+ * A single RPC, admin_dashboard(), defined in migration 0001. One call rather
+ * than a dozen queries, because the counts have to agree with each other — ask
+ * separately and a response filed between two requests makes the totals
+ * contradict. Postgres does the counting; this file only draws it.
+ *
+ * The charts are hand-written SVG (BarChart, DonutChart) rather than a charting
+ * library. Two small components weigh far less than pulling in Recharts or
+ * Chart.js for what amounts to six bars and a ring.
+ *
+ * Everything here is admin-only, enforced by RequireAdmin on the route and by
+ * the RLS policies underneath — a non-admin calling admin_dashboard() gets a
+ * result built from rows they are not allowed to see, which is none of them.
+ * ========================================================================== */
+
 import { useEffect, useState } from 'react';
 import {
   Briefcase,

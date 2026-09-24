@@ -1,3 +1,16 @@
+/**
+ * Add or edit one alumnus in the school roster.
+ *
+ * The same dialog does both: passing `row = null` opens it empty for a new
+ * entry, passing a row opens it filled in. One component rather than two
+ * near-identical ones, so the validation rules cannot drift apart.
+ *
+ * Saving upserts on NISN, which means correcting somebody who already exists
+ * updates them instead of creating a duplicate — the same rule the CSV import
+ * follows, for the same reason: NISN is the one identifier the school can rely
+ * on being unique.
+ */
+
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { X } from 'lucide-react';

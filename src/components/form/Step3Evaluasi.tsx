@@ -13,7 +13,21 @@ interface Props {
   submitError: string | null;
 }
 
-/** Step 3 — Figma node 3442:410 ("Evaluasi Kualitas Pendidikan"). */
+/**
+ * Questionnaire step 3 — "Evaluasi Kualitas Pendidikan" (Figma node 3442:410).
+ *
+ * Turns the questionnaire around: the first two steps asked what happened to
+ * the alumnus, this one asks what they thought of the school that sent them
+ * there. Ratings for teaching, industrial placement (PKL), skills and
+ * discipline, plus free-text suggestions.
+ *
+ * This is the part that feeds accreditation and curriculum review, which is
+ * why it is asked of everyone regardless of which branch they took in step 2.
+ *
+ * Ratings are 1-5 scales rather than free text so they can be averaged; the
+ * satisfaction questions use faces instead of numbers, because "how satisfied
+ * are you, from 1 to 5" invites a shrug where a row of faces invites a pick.
+ */
 const Step3Evaluasi: React.FC<Props> = ({
   formData,
   setField,

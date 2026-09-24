@@ -3,7 +3,24 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 import { useAdminAuth } from '../../lib/adminAuthContext';
 
-/** Gate for every /admin route. */
+/**
+ * Gate for every /admin route.
+ *
+ * Three outcomes, deliberately different:
+ *
+ *   not signed in   → redirect to the admin login
+ *   signed in, not on the allowlist → say so, and offer to sign out
+ *   signed in and an admin          → through
+ *
+ * The middle case explains rather than redirects. Bouncing a signed-in person
+ * back to a login page they just completed reads as a broken site; telling
+ * them the account is not an admin is the actual answer.
+ *
+ * `isAdmin === null` means the check has not resolved — a failed call, or
+ * migration 0002 not applied — and is let through on purpose. The RLS policies
+ * are the real boundary, so a dashboard that returns no rows is a far better
+ * failure than locking out a correctly configured admin.
+ */
 const RequireAdmin = ({ children }: { children: ReactNode }) => {
   const { session, loading, isAdmin, signOut } = useAdminAuth();
   const location = useLocation();

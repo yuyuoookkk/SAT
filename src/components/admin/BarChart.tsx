@@ -13,7 +13,17 @@ interface Props {
   height?: number;
 }
 
-/** Magnitude by category → vertical bars, baseline-anchored, 4px rounded ends. */
+/**
+ * Magnitude by category → vertical bars, baseline-anchored, 4px rounded ends.
+ *
+ * Hand-written SVG rather than a charting library. Recharts or Chart.js would
+ * add a few hundred kilobytes to every page load to draw six rectangles, and
+ * the styling would then be theirs rather than the school's.
+ *
+ * Bars start at zero on purpose. A truncated baseline makes a difference of
+ * three look like a difference of thirty, which on a page about how many
+ * alumni found work would be a lie told with geometry.
+ */
 const BarChart = ({ bars, title, color = '#0b5ed7', height = 260 }: Props) => {
   const [hover, setHover] = useState<number | null>(null);
   const titleId = useId();

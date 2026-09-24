@@ -1,3 +1,16 @@
+/**
+ * Part-to-whole → donut, with the total in the hole.
+ *
+ * Hand-written SVG, like BarChart, and for the same reason: a charting library
+ * would cost more to download than the ring costs to draw.
+ *
+ * Used for the split between working, studying and self-employed alumni —
+ * categories that genuinely sum to a meaningful whole, which is the only
+ * situation a donut is honest in. Slice colours come from a palette checked
+ * for colour-vision deficiency, so the categories stay distinguishable to a
+ * viewer who cannot separate red from green.
+ */
+
 import { useId, useState } from 'react';
 import { formatNumber, formatPercent } from '../../lib/format';
 

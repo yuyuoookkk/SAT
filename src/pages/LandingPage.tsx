@@ -1,3 +1,23 @@
+/* =============================================================================
+ * The public landing page — what an alumnus sees before signing in.
+ *
+ * Its job is persuasion. Nobody is required to fill in a tracer study, so the
+ * page has to answer "why should I bother?" before it asks for ten minutes:
+ * the data feeds accreditation, curriculum review and industry partnerships.
+ *
+ * THE NUMBERS ARE REAL
+ *
+ * The figures in the hero and the statistics section come from the database
+ * through public_tracer_stats(), a SECURITY DEFINER function that returns
+ * counts and percentages and nothing else. That matters: this page is open to
+ * anyone, so it must be able to say "412 alumni, 64% employed" without any
+ * caller being able to reach the rows those numbers were computed from.
+ *
+ * If that call fails the page still renders, with dashes where the figures
+ * would be. A landing page blocked on one query is worse than a landing page
+ * missing one number.
+ * ========================================================================== */
+
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {

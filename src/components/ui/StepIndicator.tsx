@@ -7,7 +7,16 @@ interface Props {
   current: number;
 }
 
-/** Four-step progress rail — Figma node 3435:193. */
+/**
+ * Four-step progress rail above the questionnaire (Figma node 3435:193).
+ *
+ * Shows how far along the alumnus is and, just as importantly, how much is
+ * left. A form of unknown length is a form people abandon; four labelled steps
+ * with three behind you is a form people finish.
+ *
+ * Completed steps carry a tick rather than their number, so progress is
+ * readable at a glance without counting.
+ */
 const StepIndicator = ({ current }: Props) => {
   // Fills up to the centre of the active bullet, as in Figma node 3435:203.
   const fill = ((current - 0.5) / STEPS.length) * 100;
